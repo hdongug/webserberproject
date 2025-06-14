@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>회원가입 - 게임 아이템 거래소</title>
+    
+    <!-- CSS -->
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        .register-container {
+            min-height: calc(100vh - 80px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--background-light);
+            padding: 2rem 1rem;
+        }
+        
+        .register-card {
+            background: white;
+            padding: 3rem;
+            border-radius: 16px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 450px;
+        }
+        
+        .register-title {
+            text-align: center;
+            font-size: 2rem;
+            font-weight: bold;
+            color: var(--primary-purple);
+            margin-bottom: 2rem;
+        }
+        
+        .form-row {
+            display: flex;
+            gap: 1rem;
+        }
+        
+        .form-row .form-group {
+            flex: 1;
+        }
+        
+        .password-strength {
+            margin-top: 0.5rem;
+            font-size: 0.8rem;
+        }
+        
+        .strength-weak { color: #EF4444; }
+        .strength-medium { color: #F59E0B; }
+        .strength-strong { color: #10B981; }
+        
+        .terms-group {
+            margin: 1.5rem 0;
+            padding: 1rem;
+            background: var(--background-light);
+            border-radius: 8px;
+        }
+        
+        .terms-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        .terms-item:last-child {
+            margin-bottom: 0;
+        }
+        
+        .terms-item input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+        }
+        
+        .terms-item label {
+            font-size: 0.9rem;
+            margin-bottom: 0;
+        }
+        
+        .terms-link {
+            color: var(--primary-purple);
+            text-decoration: none;
+        }
+        
+        .terms-link:hover {
+            text-decoration: underline;
+        }
+        
+        @media (max-width: 768px) {
+            .register-card {
+                padding: 2rem;
+                margin: 1rem;
+            }
+            
+            .register-title {
+                font-size: 1.75rem;
+            }
+            
+            .form-row {
+                flex-direction: column;
+                gap: 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- 헤더 -->
+    <header class="header">
+        <nav class="navbar">
+            <a th:href="@{/}" class="logo">
+                <i class="fas fa-gamepad"></i>
+                게임 아이템 거래소
+            </a>
+            
+            <button class="menu-toggle" id="menuToggle">
+                <i class="fas fa-bars"></i>
+            </button>
+        </nav>
+    </header>
+
+    <!-- 사이드바 -->
+    <div class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <h3>메뉴</h3>
+            <button class="sidebar-close" id="sidebarClose">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <ul class="sidebar-menu">
+            <li><a th:href="@{/}"><i class="fas fa-home"></i> 홈</a></li>
+            <li><a th:href="@{/items}"><i class="fas fa-store"></i> 거래소</a></li>
+            <li><a href="#" onclick="alert('준비중입니다.')"><i class="fas fa-clipboard-list"></i> 게시판</a></li>
+            <li><a href="#" onclick="alert('준비중입니다.')"><i class="fas fa-calendar-check"></i> 출석체크</a></li>
+            <li><a th:href="@{/login}"><i class="fas fa-sign-in-alt"></i> 로그인</a></li>
+            <li><a th:href="@{/register}"><i class="fas fa-user-plus"></i> 회원가입</a></li>
+        </ul>
+    </div>
+
+    <!-- 오버레이 -->
+    <div class="overlay" id="overlay"></div>
+
+    <!-- 회원가입 컨테이너 -->
+    <div class="register-container">
+        <div class="register-card">
+            <h1 class="register-title">회원가입</h1>
+            
+            <!-- 에러 메시지 -->
+            <div th:if="${error}" class="alert alert-error">
+                <i class="fas fa-exclamation-circle"></i>
+                <span th:text="${error}">에러 메시지</span>
+            </div>
+            
+            <!-- 성공 메시지 -->
+            <div th:if="${message}" class="alert alert-success">
+                <i class="fas fa-check-circle"></i>
+                <span th:text="${message}">성공 메시지</span>
+            </div>
+            
+            <form th:action="@{/register}" method="post" id="registerForm">
+                <div class="form-group">
+                    <label for="username" class="form-label">아이디 *</label>
+                    <input type="text" 
+                           id="username" 
+                           name="username" 
+                           class="form-input" 
+                           placeholder="영문, 숫자 4-20자"
+                           required
+                           minlength="4"
+                           maxlength="20">
+                </div>
+                
+                <div class="form-group">
+                    <label for="password" class="form-label">비밀번호 *</label>
+                    <input type="password" 
+                           id="password" 
+                           name="password" 
+                           class="form-input" 
+                           placeholder="영문, 숫자, 특수문자 포함 8자 이상"
+                           required
+                           minlength="8">
+                    <div id="passwordStrength" class="password-strength"></div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="confirmPassword" class="form-label">비밀번호 확인 *</label>
+                    <input type="password" 
+                           id="confirmPassword" 
+                           name="confirmPassword" 
+                           class="form-input" 
+                           placeholder="비밀번호를 다시 입력하세요"
+                           required>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="nickname" class="form-label">닉네임 *</label>
+                        <input type="text" 
+                               id="nickname" 
+                               name="nickname" 
+                               class="form-input" 
+                               placeholder="2-10자"
+                               required
+                               minlength="2"
+                               maxlength="10">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="email" class="form-label">이메일 *</label>
+                        <input type="email" 
+                               id="email" 
+                               name="email" 
+                               class="form-input" 
+                               placeholder="example@email.com"
+                               required>
+                    </div>
+                </div>
+                
+                <!-- 약관 동의 -->
+                <div class="terms-group">
+                    <div class="terms-item">
+                        <input type="checkbox" id="agreeAll" onchange="toggleAllTerms()">
+                        <label for="agreeAll"><strong>전체 동의</strong></label>
+                    </div>
+                    <hr style="margin: 0.5rem 0; border: 1px solid #E5E7EB;">
+                    <div class="terms-item">
+                        <input type="checkbox" id="agreeTerms" name="agreeTerms" required>
+                        <label for="agreeTerms">
+                            <a href="#" class="terms-link" onclick="alert('서비스 이용약관 내용')">서비스 이용약관</a> 동의 (필수)
+                        </label>
+                    </div>
+                    <div class="terms-item">
+                        <input type="checkbox" id="agreePrivacy" name="agreePrivacy" required>
+                        <label for="agreePrivacy">
+                            <a href="#" class="terms-link" onclick="alert('개인정보 처리방침 내용')">개인정보 처리방침</a> 동의 (필수)
+                        </label>
+                    </div>
+                    <div class="terms-item">
+                        <input type="checkbox" id="agreeMarketing" name="agreeMarketing">
+                        <label for="agreeMarketing">마케팅 정보 수신 동의 (선택)</label>
+                    </div>
+                </div>
+                
+                <button type="submit" class="btn-primary" id="registerBtn">
+                    회원가입
+                </button>
+                
+                <div class="register-link">
+                    이미 계정이 있으신가요? <a th:href="@{/login}">로그인</a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- JavaScript -->
+    <script th:src="@{/js/main.js}"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/js/all.min.js"></script>
+    
+    <script>
+        // 비밀번호 강도 체크
+        document.getElementById('password').addEventListener('input', function() {
+            const password = this.value;
+            const strengthDiv = document.getElementById('passwordStrength');
+            
+            if (password.length === 0) {
+                strengthDiv.textContent = '';
+                return;
+            }
+            
+            let strength = 0;
+            if (password.length >= 8) strength++;
+            if (/[a-z]/.test(password)) strength++;
+            if (/[A-Z]/.test(password)) strength++;
+            if (/[0-9]/.test(password)) strength++;
+            if (/[^A-Za-z0-9]/.test(password)) strength++;
+            
+            if (strength < 3) {
+                strengthDiv.textContent = '약함';
+                strengthDiv.className = 'password-strength strength-weak';
+            } else if (strength < 4) {
+                strengthDiv.textContent = '보통';
+                strengthDiv.className = 'password-strength strength-medium';
+            } else {
+                strengthDiv.textContent = '강함';
+                strengthDiv.className = 'password-strength strength-strong';
+            }
+        });
+        
+        // 비밀번호 확인
+        document.getElementById('confirmPassword').addEventListener('input', function() {
+            const password = document.getElementById('password').value;
+            const confirmPassword = this.value;
+            
+            if (confirmPassword && password !== confirmPassword) {
+                this.setCustomValidity('비밀번호가 일치하지 않습니다.');
+            } else {
+                this.setCustomValidity('');
+            }
+        });
+        
+        // 전체 동의 체크박스
+        function toggleAllTerms() {
+            const agreeAll = document.getElementById('agreeAll');
+            const terms = ['agreeTerms', 'agreePrivacy', 'agreeMarketing'];
+            
+            terms.forEach(termId => {
+                document.getElementById(termId).checked = agreeAll.checked;
+            });
+        }
+        
+        // 개별 약관 체크 시 전체 동의 상태 업데이트
+        ['agreeTerms', 'agreePrivacy', 'agreeMarketing'].forEach(termId => {
+            document.getElementById(termId).addEventListener('change', function() {
+                const allChecked = ['agreeTerms', 'agreePrivacy', 'agreeMarketing']
+                    .every(id => document.getElementById(id).checked);
+                document.getElementById('agreeAll').checked = allChecked;
+            });
+        });
+        
+        // 폼 제출 처리
+        document.getElementById('registerForm').addEventListener('submit', function(e) {
+            const submitBtn = document.getElementById('registerBtn');
+            submitBtn.textContent = '가입 중...';
+            submitBtn.disabled = true;
+        });
+    </script>
+</body>
+</html>
+

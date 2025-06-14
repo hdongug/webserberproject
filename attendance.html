@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>출석체크 - 게임 아이템 거래소</title>
+    
+    <!-- CSS -->
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        .attendance-container {
+            max-width: 800px;
+            margin: 20px auto;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+        }
+        
+        .attendance-header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        
+        .attendance-header h1 {
+            color: var(--primary-purple);
+            font-size: 1.8rem;
+            margin-bottom: 10px;
+        }
+        
+        .attendance-calendar {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 10px;
+            margin-top: 20px;
+        }
+        
+        .calendar-day {
+            border: 1px solid #e0e0e0;
+            border-radius: 4px;
+            padding: 10px;
+            text-align: center;
+            min-height: 80px;
+        }
+        
+        .calendar-day-name {
+            font-weight: 600;
+            color: #333;
+            font-size: 0.9rem;
+            margin-bottom: 5px;
+        }
+        
+        .calendar-day-number {
+            font-size: 1.2rem;
+            color: #333;
+        }
+        
+        .calendar-day.checked {
+            background-color: rgba(107, 70, 193, 0.1);
+            border-color: var(--primary-purple);
+        }
+        
+        .calendar-day.checked .calendar-check {
+            display: block;
+            color: var(--primary-purple);
+            font-size: 1.2rem;
+            margin-top: 5px;
+        }
+        
+        .calendar-check {
+            display: none;
+        }
+        
+        .calendar-day.today {
+            background-color: rgba(16, 185, 129, 0.1);
+            border-color: var(--success);
+        }
+        
+        .calendar-day.today .calendar-day-number {
+            color: var(--success);
+        }
+        
+        .attendance-info {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #f5f5f5;
+            border-radius: 4px;
+        }
+        
+        .attendance-stat {
+            text-align: center;
+        }
+        
+        .attendance-number {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: var(--primary-purple);
+            display: block;
+        }
+        
+        .attendance-label {
+            font-size: 0.9rem;
+            color: #666;
+        }
+        
+        .attendance-reward {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: rgba(107, 70, 193, 0.1);
+            border-radius: 4px;
+            text-align: center;
+        }
+        
+        .attendance-reward h3 {
+            color: var(--primary-purple);
+            margin-bottom: 10px;
+        }
+        
+        .btn-check {
+            display: block;
+            width: 100%;
+            max-width: 200px;
+            margin: 20px auto 0;
+            padding: 10px;
+            background-color: var(--primary-purple);
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        
+        .btn-check:hover {
+            background-color: var(--dark-purple);
+        }
+        
+        .btn-check:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+        }
+    </style>
+</head>
+<body>
+    <!-- 헤더 -->
+    <header class="header">
+        <nav class="navbar">
+            <a href="index.html" class="logo">
+                <i class="fas fa-gamepad"></i>
+                게임 아이템 거래소
+            </a>
+            
+            <button class="menu-toggle" id="menuToggle">
+                <i class="fas fa-bars"></i>
+            </button>
+        </nav>
+    </header>
+
+    <!-- 사이드바 -->
+    <div class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <h3>메뉴</h3>
+            <button class="sidebar-close" id="sidebarClose">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <ul class="sidebar-menu">
+            <li><a href="index.html"><i class="fas fa-home"></i> 홈</a></li>
+            <li><a href="market.html"><i class="fas fa-store"></i> 거래소</a></li>
+            <li><a href="inventory.html"><i class="fas fa-box"></i> 창고</a></li>
+            <li><a href="board.html"><i class="fas fa-clipboard-list"></i> 게시판</a></li>
+            <li><a href="attendance.html" class="active"><i class="fas fa-calendar-check"></i> 출석체크</a></li>
+            <li><a href="login.html"><i class="fas fa-sign-in-alt"></i> 로그인</a></li>
+            <li><a href="register.html"><i class="fas fa-user-plus"></i> 회원가입</a></li>
+        </ul>
+    </div>
+
+    <!-- 오버레이 -->
+    <div class="overlay" id="overlay"></div>
+
+    <!-- 메인 콘텐츠 -->
+    <main class="main-content">
+        <div class="attendance-container">
+            <div class="attendance-header">
+                <h1>일일 출석체크</h1>
+                <p>매일 출석체크하고 보상을 받으세요!</p>
+            </div>
+            
+            <div class="attendance-calendar">
+                <!-- 요일 헤더 -->
+                <div class="calendar-day-name">일</div>
+                <div class="calendar-day-name">월</div>
+                <div class="calendar-day-name">화</div>
+                <div class="calendar-day-name">수</div>
+                <div class="calendar-day-name">목</div>
+                <div class="calendar-day-name">금</div>
+                <div class="calendar-day-name">토</div>
+                
+                <!-- 달력 날짜 - 동적으로 생성될 예정 -->
+            </div>
+            
+            <div class="attendance-info">
+                <div class="attendance-stat">
+                    <span class="attendance-number">12</span>
+                    <span class="attendance-label">이번 달 출석</span>
+                </div>
+                <div class="attendance-stat">
+                    <span class="attendance-number">3</span>
+                    <span class="attendance-label">연속 출석</span>
+                </div>
+                <div class="attendance-stat">
+                    <span class="attendance-number">42</span>
+                    <span class="attendance-label">총 출석일</span>
+                </div>
+            </div>
+            
+            <div class="attendance-reward">
+                <h3>오늘의 출석 보상</h3>
+                <p>일반 상자 1개 + 골드 500</p>
+                <button class="btn-check" id="attendanceBtn">출석체크하기</button>
+            </div>
+        </div>
+    </main>
+
+    <!-- 푸터 -->
+    <footer class="footer">
+        <div class="container">
+            <p>&copy; 2025 게임 아이템 거래소 All Rights Reserved.</p>
+            <p>
+                <a href="#">이용약관</a> |
+                <a href="#">개인정보처리방침</a> |
+                <a href="#">고객센터</a>
+            </p>
+        </div>
+    </footer>
+
+    <!-- JavaScript -->
+    <script src="main.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // 현재 날짜 가져오기
+            const today = new Date();
+            const currentMonth = today.getMonth();
+            const currentYear = today.getFullYear();
+            
+            // 달력 생성
+            const calendarContainer = document.querySelector('.attendance-calendar');
+            createCalendar(currentYear, currentMonth, calendarContainer);
+            
+            // 출석체크 버튼 이벤트
+            const attendanceBtn = document.getElementById('attendanceBtn');
+            if (attendanceBtn) {
+                attendanceBtn.addEventListener('click', function() {
+                    // 오늘 날짜에 해당하는 요소 찾기
+                    const todayElement = document.querySelector('.calendar-day.today');
+                    if (todayElement) {
+                        todayElement.classList.add('checked');
+                        const checkIcon = document.createElement('i');
+                        checkIcon.className = 'fas fa-check calendar-check';
+                        todayElement.appendChild(checkIcon);
+                        
+                        // 버튼 비활성화
+                        attendanceBtn.disabled = true;
+                        attendanceBtn.textContent = '오늘 출석완료!';
+                        
+                        // 통계 업데이트 (예시)
+                        const monthlyAttendance = document.querySelectorAll('.attendance-number')[0];
+                        const streak = document.querySelectorAll('.attendance-number')[1];
+                        const totalAttendance = document.querySelectorAll('.attendance-number')[2];
+                        
+                        monthlyAttendance.textContent = parseInt(monthlyAttendance.textContent) + 1;
+                        streak.textContent = parseInt(streak.textContent) + 1;
+                        totalAttendance.textContent = parseInt(totalAttendance.textContent) + 1;
+                    }
+                });
+            }
+        });
+        
+        // 달력 생성 함수
+        function createCalendar(year, month, container) {
+            // 월의 첫 날
+            const firstDay = new Date(year, month, 1);
+            // 월의 마지막 날
+            const lastDay = new Date(year, month + 1, 0);
+            
+            // 월의 첫 날의 요일 (0: 일요일, 6: 토요일)
+            const firstDayIndex = firstDay.getDay();
+            
+            // 빈 칸 추가 (첫 날 이전)
+            for (let i = 0; i < firstDayIndex; i++) {
+                const emptyDay = document.createElement('div');
+                emptyDay.className = 'calendar-day empty';
+                container.appendChild(emptyDay);
+            }
+            
+            // 날짜 추가
+            const today = new Date();
+            for (let i = 1; i <= lastDay.getDate(); i++) {
+                const dayElement = document.createElement('div');
+                dayElement.className = 'calendar-day';
+                
+                const dayNumber = document.createElement('div');
+                dayNumber.className = 'calendar-day-number';
+                dayNumber.textContent = i;
+                dayElement.appendChild(dayNumber);
+                
+                // 오늘 날짜 표시
+                if (year === today.getFullYear() && month === today.getMonth() && i === today.getDate()) {
+                    dayElement.classList.add('today');
+                }
+                
+                // 예시 출석 체크 (랜덤)
+                if (i < today.getDate() && Math.random() > 0.3) {
+                    dayElement.classList.add('checked');
+                    const checkIcon = document.createElement('i');
+                    checkIcon.className = 'fas fa-check calendar-check';
+                    dayElement.appendChild(checkIcon);
+                }
+                
+                container.appendChild(dayElement);
+            }
+        }
+    </script>
+</body>
+</html>

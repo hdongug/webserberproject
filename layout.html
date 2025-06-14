@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${title != null ? title + ' - 게임 아이템 거래소' : '게임 아이템 거래소'}">게임 아이템 거래소</title>
+    
+    <!-- CSS -->
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- 추가 CSS -->
+    <th:block th:fragment="css"></th:block>
+</head>
+<body>
+    <!-- 헤더 -->
+    <header class="header">
+        <nav class="navbar">
+            <a th:href="@{/}" class="logo">
+                <i class="fas fa-gamepad"></i>
+                게임 아이템 거래소
+            </a>
+            
+            <button class="menu-toggle" id="menuToggle">
+                <i class="fas fa-bars"></i>
+            </button>
+        </nav>
+    </header>
+
+    <!-- 사이드바 -->
+    <div class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <h3>메뉴</h3>
+            <button class="sidebar-close" id="sidebarClose">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <ul class="sidebar-menu">
+            <li><a th:href="@{/}"><i class="fas fa-home"></i> 홈</a></li>
+            <li><a th:href="@{/items}"><i class="fas fa-store"></i> 거래소</a></li>
+            <li><a th:href="@{/board}"><i class="fas fa-clipboard-list"></i> 게시판</a></li>
+            <li><a th:href="@{/attendance}"><i class="fas fa-calendar-check"></i> 출석체크</a></li>
+            <li sec:authorize="!isAuthenticated()"><a th:href="@{/login}"><i class="fas fa-sign-in-alt"></i> 로그인</a></li>
+            <li sec:authorize="!isAuthenticated()"><a th:href="@{/register}"><i class="fas fa-user-plus"></i> 회원가입</a></li>
+            <li sec:authorize="isAuthenticated()"><a th:href="@{/mypage}"><i class="fas fa-user"></i> 마이페이지</a></li>
+            <li sec:authorize="isAuthenticated()">
+                <form th:action="@{/logout}" method="post" style="margin: 0;">
+                    <button type="submit" style="background: none; border: none; color: inherit; padding: 1rem 1.5rem; width: 100%; text-align: left; cursor: pointer;">
+                        <i class="fas fa-sign-out-alt"></i> 로그아웃
+                    </button>
+                </form>
+            </li>
+        </ul>
+    </div>
+
+    <!-- 오버레이 -->
+    <div class="overlay" id="overlay"></div>
+
+    <!-- 메인 컨텐츠 -->
+    <main th:fragment="content">
+        <!-- 페이지별 컨텐츠가 여기에 삽입됩니다 -->
+    </main>
+
+    <!-- 푸터 -->
+    <footer class="footer" th:fragment="footer">
+        <div class="container">
+            <div class="footer-content">
+                <p>&copy; 2024 게임 아이템 거래소. All rights reserved.</p>
+                <div class="footer-links">
+                    <a href="#">이용약관</a>
+                    <a href="#">개인정보처리방침</a>
+                    <a href="#">고객센터</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- JavaScript -->
+    <script th:src="@{/js/main.js}"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/js/all.min.js"></script>
+    
+    <!-- 추가 JavaScript -->
+    <th:block th:fragment="scripts"></th:block>
+</body>
+</html>
+
