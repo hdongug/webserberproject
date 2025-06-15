@@ -1,20 +1,28 @@
 # 1단계: 빌드
-FROM maven:3.8.6-eclipse-temurin-17 AS builder
+FROM maven:3.8.6-eclipse-temurin-11 AS builder
 
 WORKDIR /app
 COPY . .
 
-# WAR 파일 빌드
-RUN mvn clean package -DskipTests
+# 컴파일 및 JAR 생성
+RUN mkdir -p target/classes \
+    && javac -d target/classes SimpleWebServer.java \
+    && cd target/classes \
+    && jar cvf ../simple-web-server.jar *.class
 
 # 2단계: 실행
-FROM tomcat:9.0-jdk17
+FROM eclipse-temurin:11-jre
 
-# 기존 webapps 제거
-RUN rm -rf /usr/local/tomcat/webapps/*
+WORKDIR /app
 
-# 빌드된 WAR 복사
-COPY --from=builder /app/target/game-item-marketplace-1.0-SNAPSHOT.war /usr/local/tomcat/webapps/ROOT.war
+# 컴파일된 JAR과 정적 파일 복사
+COPY --from=builder /app/target/simple-web-server.jar /app/
+COPY *.html /app/
+COPY style.css /app/
+COPY css/ /app/css/
+COPY js/ /app/js/
+COPY PNG/ /app/PNG/
 
 EXPOSE 8080
-CMD ["catalina.sh", "run"]
+
+CMD ["java", "-cp", "simple-web-server.jar", "SimpleWebServer"]
