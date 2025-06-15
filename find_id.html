@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>아이디 찾기 - 게임 아이템 거래소</title>
+    <link rel="stylesheet" href="css/auth.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+</head>
+<body>
+    <!-- 헤더 -->
+    <header class="header">
+        <a href="index.html" class="site-title">게임 아이템 거래소</a>
+        <button class="menu-btn" id="menuToggle">
+            <i class="fas fa-bars"></i>
+        </button>
+    </header>
+
+    <!-- 사이드바 메뉴 -->
+    <aside class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <h3>메뉴</h3>
+            <button class="close-btn" id="closeMenu">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <ul class="sidebar-menu">
+            <li><a href="index.html"><i class="fas fa-home"></i> 홈</a></li>
+            <li><a href="login.html"><i class="fas fa-sign-in-alt"></i> 로그인</a></li>
+            <li><a href="register.html"><i class="fas fa-user-plus"></i> 회원가입</a></li>
+            <li><a href="#"><i class="fas fa-shopping-cart"></i> 거래소</a></li>
+            <li><a href="#"><i class="fas fa-coins"></i> 내 아이템</a></li>
+            <li><a href="#"><i class="fas fa-comment"></i> 커뮤니티</a></li>
+        </ul>
+    </aside>
+
+    <!-- 아이디 찾기 컨테이너 -->
+    <div class="auth-container">
+        <div class="auth-form">
+            <h2 class="auth-title">아이디 찾기</h2>
+            
+            <!-- 결과 메시지 -->
+            <div id="resultMessage" class="alert" style="display: none;">
+                <i class="fas fa-info-circle"></i>
+                <span>결과 메시지</span>
+            </div>
+            
+            <form action="#" method="post" id="findIdForm">
+                <!-- 닉네임 입력란 -->
+                <div class="form-group form-row">
+                    <label for="nickname" class="form-label">닉네임 :</label>
+                    <div class="form-input-wrap">
+                        <input type="text" 
+                               id="nickname" 
+                               name="nickname" 
+                               placeholder="닉네임을 입력하세요" 
+                               required 
+                               class="form-control" />
+                    </div>
+                </div>
+                
+                <div class="form-group form-row">
+                    <label class="form-label"></label>
+                    <div class="form-input-wrap">
+                        <button type="submit" class="btn btn-primary">아이디 찾기</button>
+                    </div>
+                </div>
+            </form>
+            
+            <div class="auth-links">
+                <a href="find_password.html" class="auth-link">비밀번호 찾기</a>
+                <a href="login.html" class="auth-link">로그인</a>
+                <a href="register.html" class="auth-link">회원가입</a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 메뉴 토글 함수
+        document.getElementById('menuToggle').addEventListener('click', function() {
+            document.getElementById('sidebar').classList.toggle('open');
+        });
+        
+        // 메뉴 닫기 함수
+        document.getElementById('closeMenu').addEventListener('click', function() {
+            document.getElementById('sidebar').classList.remove('open');
+        });
+
+        // 아이디 찾기 폼 제출 처리
+        document.getElementById('findIdForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const nickname = document.getElementById('nickname').value;
+            const resultMessage = document.getElementById('resultMessage');
+            
+            // localStorage에서 사용자 데이터 가져오기
+            const users = JSON.parse(localStorage.getItem('users')) || [];
+            
+            // 닉네임으로 사용자 찾기
+            const foundUser = users.find(user => user.nickname === nickname);
+            
+            if (foundUser) {
+                // 사용자를 찾았을 때
+                resultMessage.className = 'alert alert-success';
+                resultMessage.innerHTML = `<i class="fas fa-check-circle"></i> <span>아이디: ${foundUser.username}</span>`;
+            } else {
+                // 사용자를 찾지 못했을 때
+                resultMessage.className = 'alert alert-error';
+                resultMessage.innerHTML = '<i class="fas fa-exclamation-circle"></i> <span>일치한 닉네임이 없습니다.</span>';
+            }
+            
+            resultMessage.style.display = 'flex';
+        });
+    </script>
+</body>
+</html>

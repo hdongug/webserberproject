@@ -1,12 +1,13 @@
 <!DOCTYPE html>
-<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<html lang="ko">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>회원가입 - 게임 아이템 거래소</title>
     
     <!-- CSS -->
-    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <link rel="stylesheet" href="css/common.css">
+    <link rel="stylesheet" href="css/auth.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -114,154 +115,202 @@
 <body>
     <!-- 헤더 -->
     <header class="header">
-        <nav class="navbar">
-            <a th:href="@{/}" class="logo">
-                <i class="fas fa-gamepad"></i>
-                게임 아이템 거래소
-            </a>
-            
-            <button class="menu-toggle" id="menuToggle">
-                <i class="fas fa-bars"></i>
-            </button>
-        </nav>
+        <a href="index.html" class="site-title">게임 아이템 거래소</a>
+        <button class="menu-btn" onclick="toggleMenu()">☰</button>
     </header>
-
-    <!-- 사이드바 -->
-    <div class="sidebar" id="sidebar">
-        <div class="sidebar-header">
-            <h3>메뉴</h3>
-            <button class="sidebar-close" id="sidebarClose">
-                <i class="fas fa-times"></i>
-            </button>
-        </div>
-        <ul class="sidebar-menu">
-            <li><a th:href="@{/}"><i class="fas fa-home"></i> 홈</a></li>
-            <li><a th:href="@{/items}"><i class="fas fa-store"></i> 거래소</a></li>
-            <li><a href="#" onclick="alert('준비중입니다.')"><i class="fas fa-clipboard-list"></i> 게시판</a></li>
-            <li><a href="#" onclick="alert('준비중입니다.')"><i class="fas fa-calendar-check"></i> 출석체크</a></li>
-            <li><a th:href="@{/login}"><i class="fas fa-sign-in-alt"></i> 로그인</a></li>
-            <li><a th:href="@{/register}"><i class="fas fa-user-plus"></i> 회원가입</a></li>
-        </ul>
+    
+    <!-- 사이드 메뉴 -->
+    <div class="side-menu">
+        <button class="side-menu-close" onclick="closeMenu()">×</button>
+        <a href="index.html" class="menu-item">홈</a>
+        <a href="attendance.html" class="menu-item">출석체크</a>
+        <a href="profile.html" class="menu-item">프로필</a>
+        <a href="community_board.html" class="menu-item">게시판</a>
+        <a href="login.html" class="menu-item">로그인</a>
+        <a href="register.html" class="menu-item">회원가입</a>
     </div>
-
-    <!-- 오버레이 -->
-    <div class="overlay" id="overlay"></div>
 
     <!-- 회원가입 컨테이너 -->
     <div class="register-container">
-        <div class="register-card">
-            <h1 class="register-title">회원가입</h1>
+        <div class="register-form">
+            <h2 class="register-title">회원가입</h2>
             
             <!-- 에러 메시지 -->
-            <div th:if="${error}" class="alert alert-error">
+            <div id="errorMessage" class="alert alert-error" style="display: none;">
                 <i class="fas fa-exclamation-circle"></i>
-                <span th:text="${error}">에러 메시지</span>
+                <span>에러 메시지</span>
             </div>
             
             <!-- 성공 메시지 -->
-            <div th:if="${message}" class="alert alert-success">
+            <div id="successMessage" class="alert alert-success" style="display: none;">
                 <i class="fas fa-check-circle"></i>
-                <span th:text="${message}">성공 메시지</span>
+                <span>성공 메시지</span>
             </div>
             
-            <form th:action="@{/register}" method="post" id="registerForm">
-                <div class="form-group">
-                    <label for="username" class="form-label">아이디 *</label>
-                    <input type="text" 
-                           id="username" 
-                           name="username" 
-                           class="form-input" 
-                           placeholder="영문, 숫자 4-20자"
-                           required
-                           minlength="4"
-                           maxlength="20">
+            <form action="#" method="post" id="registerForm">
+                <!-- 아이디 입력란 -->
+                <div class="form-group form-row">
+                    <label for="username" class="form-label">아이디 :</label>
+                    <div class="form-input-wrap">
+                        <input type="text" 
+                               id="username" 
+                               name="username" 
+                               placeholder="아이디 또는 전화번호" 
+                               required 
+                               class="form-control" />
+                    </div>
                 </div>
                 
-                <div class="form-group">
-                    <label for="password" class="form-label">비밀번호 *</label>
-                    <input type="password" 
-                           id="password" 
-                           name="password" 
-                           class="form-input" 
-                           placeholder="영문, 숫자, 특수문자 포함 8자 이상"
-                           required
-                           minlength="8">
-                    <div id="passwordStrength" class="password-strength"></div>
+                <!-- 비밀번호 입력란 -->
+                <div class="form-group form-row">
+                    <label for="password" class="form-label">비밀번호 :</label>
+                    <div class="form-input-wrap">
+                        <input type="password" 
+                               id="password" 
+                               name="password" 
+                               placeholder="비밀번호" 
+                               required 
+                               class="form-control" />
+                    </div>
                 </div>
                 
-                <div class="form-group">
-                    <label for="confirmPassword" class="form-label">비밀번호 확인 *</label>
-                    <input type="password" 
-                           id="confirmPassword" 
-                           name="confirmPassword" 
-                           class="form-input" 
-                           placeholder="비밀번호를 다시 입력하세요"
-                           required>
+                <!-- 비밀번호 확인 입력란 -->
+                <div class="form-group form-row">
+                    <label for="confirmPassword" class="form-label">비밀번호 확인 :</label>
+                    <div class="form-input-wrap">
+                        <input type="password" 
+                               id="confirmPassword" 
+                               name="confirmPassword" 
+                               placeholder="비밀번호 확인" 
+                               required 
+                               class="form-control" />
+                    </div>
                 </div>
                 
-                <div class="form-row">
-                    <div class="form-group">
-                        <label for="nickname" class="form-label">닉네임 *</label>
+                <!-- 닉네임 입력란 -->
+                <div class="form-group form-row">
+                    <label for="nickname" class="form-label">닉네임 :</label>
+                    <div class="form-input-wrap">
                         <input type="text" 
                                id="nickname" 
                                name="nickname" 
-                               class="form-input" 
-                               placeholder="2-10자"
-                               required
-                               minlength="2"
-                               maxlength="10">
-                    </div>
-                    
-                    <div class="form-group">
-                        <label for="email" class="form-label">이메일 *</label>
-                        <input type="email" 
-                               id="email" 
-                               name="email" 
-                               class="form-input" 
-                               placeholder="example@email.com"
-                               required>
+                               placeholder="닉네임" 
+                               required 
+                               class="form-control" />
                     </div>
                 </div>
                 
-                <!-- 약관 동의 -->
-                <div class="terms-group">
-                    <div class="terms-item">
-                        <input type="checkbox" id="agreeAll" onchange="toggleAllTerms()">
-                        <label for="agreeAll"><strong>전체 동의</strong></label>
-                    </div>
-                    <hr style="margin: 0.5rem 0; border: 1px solid #E5E7EB;">
-                    <div class="terms-item">
-                        <input type="checkbox" id="agreeTerms" name="agreeTerms" required>
-                        <label for="agreeTerms">
-                            <a href="#" class="terms-link" onclick="alert('서비스 이용약관 내용')">서비스 이용약관</a> 동의 (필수)
+                <!-- 성별 선택 -->
+                <div class="form-group form-row">
+                    <label class="form-label">성별 :</label>
+                    <div class="gender-options">
+                        <label class="gender-option">
+                            <input type="radio" name="gender" value="male" required>
+                            <span class="gender-text">남자</span>
+                        </label>
+                        <label class="gender-option">
+                            <input type="radio" name="gender" value="female" required>
+                            <span class="gender-text">여자</span>
                         </label>
                     </div>
-                    <div class="terms-item">
-                        <input type="checkbox" id="agreePrivacy" name="agreePrivacy" required>
-                        <label for="agreePrivacy">
-                            <a href="#" class="terms-link" onclick="alert('개인정보 처리방침 내용')">개인정보 처리방침</a> 동의 (필수)
-                        </label>
-                    </div>
-                    <div class="terms-item">
-                        <input type="checkbox" id="agreeMarketing" name="agreeMarketing">
-                        <label for="agreeMarketing">마케팅 정보 수신 동의 (선택)</label>
+                </div>
+                
+                <div class="form-group form-row">
+                    <label class="form-label"></label>
+                    <div class="form-input-wrap">
+                        <button type="submit" class="btn btn-register">회원가입</button>
                     </div>
                 </div>
                 
-                <button type="submit" class="btn-primary" id="registerBtn">
-                    회원가입
-                </button>
-                
-                <div class="register-link">
-                    이미 계정이 있으신가요? <a th:href="@{/login}">로그인</a>
-                </div>
+                <!-- 로그인 링크 부분은 로그인 페이지에서 처리함 -->
             </form>
         </div>
     </div>
 
     <!-- JavaScript -->
-    <script th:src="@{/js/main.js}"></script>
+    <script src="js/common.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/js/all.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // 회원가입 폼 제출 처리
+            const registerForm = document.getElementById('registerForm');
+            if (registerForm) {
+                registerForm.addEventListener('submit', function(e) {
+                    e.preventDefault();
+                    
+                    const username = document.getElementById('username').value;
+                    const email = document.getElementById('email').value;
+                    const password = document.getElementById('password').value;
+                    const confirmPassword = document.getElementById('confirmPassword').value;
+                    
+                    // 간단한 폼 유효성 검사
+                    if (!username || !email || !password || !confirmPassword) {
+                        showError('모든 필수 항목을 입력해주세요.');
+                        return;
+                    }
+                    
+                    if (password !== confirmPassword) {
+                        showError('비밀번호와 비밀번호 확인이 일치하지 않습니다.');
+                        return;
+                    }
+                    
+                    // 이메일 형식 검사
+                    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                    if (!emailRegex.test(email)) {
+                        showError('올바른 이메일 형식이 아닙니다.');
+                        return;
+                    }
+                    
+                    // 임시 저장 (로컬스토리지 사용, 실제로는 서버에 저장)
+                    const users = JSON.parse(localStorage.getItem('users')) || [];
+                    
+                    // 중복 아이디 검사
+                    if (users.some(user => user.username === username)) {
+                        showError('이미 사용 중인 아이디입니다.');
+                        return;
+                    }
+                    
+                    // 중복 이메일 검사
+                    if (users.some(user => user.email === email)) {
+                        showError('이미 사용 중인 이메일입니다.');
+                        return;
+                    }
+                    
+                    // 회원 정보 저장
+                    const newUser = {
+                        username: username,
+                        email: email,
+                        password: password,
+                        name: document.getElementById('name')?.value || '',
+                        registeredAt: new Date().toISOString()
+                    };
+                    
+                    users.push(newUser);
+                    localStorage.setItem('users', JSON.stringify(users));
+                    
+                    // 성공 메시지 표시
+                    const successMessage = document.getElementById('successMessage');
+                    successMessage.style.display = 'block';
+                    successMessage.querySelector('span').textContent = '회원가입에 성공했습니다! 잠시 후 로그인 페이지로 이동합니다.';
+                    
+                    // 폼 초기화
+                    registerForm.reset();
+                    
+                    // 3초 후 로그인 페이지로 이동
+                    setTimeout(() => {
+                        window.location.href = 'login.html';
+                    }, 3000);
+                });
+            }
+            
+            // 에러 메시지 표시 함수
+            function showError(message) {
+                const errorMessage = document.getElementById('errorMessage');
+                errorMessage.style.display = 'block';
+                errorMessage.querySelector('span').textContent = message;
+            }
+        });
+    </script>
     
     <script>
         // 비밀번호 강도 체크

@@ -6,7 +6,7 @@
     <title>출석체크 - 게임 아이템 거래소</title>
     
     <!-- CSS -->
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="css/common.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -145,44 +145,60 @@
             background-color: #ccc;
             cursor: not-allowed;
         }
+        
+        /* 년도 및 월 선택 스타일 */
+        .date-selector {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin: 20px 0;
+        }
+        
+        .selector-group {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .selector-group label {
+            font-weight: 600;
+            color: #333;
+        }
+        
+        .date-select {
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            background-color: white;
+            font-size: 14px;
+            color: #333;
+            cursor: pointer;
+            min-width: 100px;
+        }
+        
+        .date-select:focus {
+            border-color: var(--primary-purple);
+            outline: none;
+        }
     </style>
 </head>
 <body>
     <!-- 헤더 -->
     <header class="header">
-        <nav class="navbar">
-            <a href="index.html" class="logo">
-                <i class="fas fa-gamepad"></i>
-                게임 아이템 거래소
-            </a>
-            
-            <button class="menu-toggle" id="menuToggle">
-                <i class="fas fa-bars"></i>
-            </button>
-        </nav>
+        <a href="index.html" class="site-title">게임 아이템 거래소</a>
+        <button class="menu-btn" onclick="toggleMenu()">☰</button>
     </header>
-
-    <!-- 사이드바 -->
-    <div class="sidebar" id="sidebar">
-        <div class="sidebar-header">
-            <h3>메뉴</h3>
-            <button class="sidebar-close" id="sidebarClose">
-                <i class="fas fa-times"></i>
-            </button>
-        </div>
-        <ul class="sidebar-menu">
-            <li><a href="index.html"><i class="fas fa-home"></i> 홈</a></li>
-            <li><a href="market.html"><i class="fas fa-store"></i> 거래소</a></li>
-            <li><a href="inventory.html"><i class="fas fa-box"></i> 창고</a></li>
-            <li><a href="board.html"><i class="fas fa-clipboard-list"></i> 게시판</a></li>
-            <li><a href="attendance.html" class="active"><i class="fas fa-calendar-check"></i> 출석체크</a></li>
-            <li><a href="login.html"><i class="fas fa-sign-in-alt"></i> 로그인</a></li>
-            <li><a href="register.html"><i class="fas fa-user-plus"></i> 회원가입</a></li>
-        </ul>
+    
+    <!-- 사이드 메뉴 -->
+    <div class="side-menu">
+        <button class="side-menu-close" onclick="closeMenu()">×</button>
+        <a href="index.html" class="menu-item">홈</a>
+        <a href="attendance.html" class="menu-item">출석체크</a>
+        <a href="profile.html" class="menu-item">프로필</a>
+        <a href="community_board.html" class="menu-item">게시판</a>
+        <a href="login.html" class="menu-item">로그인</a>
+        <a href="register.html" class="menu-item">회원가입</a>
     </div>
-
-    <!-- 오버레이 -->
-    <div class="overlay" id="overlay"></div>
 
     <!-- 메인 콘텐츠 -->
     <main class="main-content">
@@ -190,6 +206,22 @@
             <div class="attendance-header">
                 <h1>일일 출석체크</h1>
                 <p>매일 출석체크하고 보상을 받으세요!</p>
+                
+                <!-- 년도 및 월 선택 -->
+                <div class="date-selector">
+                    <div class="selector-group">
+                        <label for="yearSelect">년도</label>
+                        <select id="yearSelect" class="date-select">
+                            <!-- 동적으로 채워짐 -->
+                        </select>
+                    </div>
+                    <div class="selector-group">
+                        <label for="monthSelect">월</label>
+                        <select id="monthSelect" class="date-select">
+                            <!-- 동적으로 채워짐 -->
+                        </select>
+                    </div>
+                </div>
             </div>
             
             <div class="attendance-calendar">
@@ -202,7 +234,8 @@
                 <div class="calendar-day-name">금</div>
                 <div class="calendar-day-name">토</div>
                 
-                <!-- 달력 날짜 - 동적으로 생성될 예정 -->
+                <!-- 달력 날짜는 동적으로 생성됨 -->
+                <div id="calendar-days-container"></div>
             </div>
             
             <div class="attendance-info">
@@ -242,6 +275,7 @@
 
     <!-- JavaScript -->
     <script src="main.js"></script>
+    <script src="js/common.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             // 현재 날짜 가져오기
@@ -249,34 +283,127 @@
             const currentMonth = today.getMonth();
             const currentYear = today.getFullYear();
             
+            // 년도 선택 드롭다운 초기화
+            const yearSelect = document.getElementById('yearSelect');
+            const startYear = currentYear - 5;
+            const endYear = currentYear + 5;
+            
+            for (let year = startYear; year <= endYear; year++) {
+                const option = document.createElement('option');
+                option.value = year;
+                option.textContent = year + '년';
+                if (year === currentYear) {
+                    option.selected = true;
+                }
+                yearSelect.appendChild(option);
+            }
+            
+            // 월 선택 드롭다운 초기화
+            const monthSelect = document.getElementById('monthSelect');
+            const monthNames = [
+                '1월', '2월', '3월', '4월', '5월', '6월',
+                '7월', '8월', '9월', '10월', '11월', '12월'
+            ];
+            
+            for (let i = 0; i < 12; i++) {
+                const option = document.createElement('option');
+                option.value = i;
+                option.textContent = monthNames[i];
+                if (i === currentMonth) {
+                    option.selected = true;
+                }
+                monthSelect.appendChild(option);
+            }
+            
             // 달력 생성
             const calendarContainer = document.querySelector('.attendance-calendar');
             createCalendar(currentYear, currentMonth, calendarContainer);
             
-            // 출석체크 버튼 이벤트
+            // 년도, 월 선택 이벤트 처리
+            yearSelect.addEventListener('change', updateCalendar);
+            monthSelect.addEventListener('change', updateCalendar);
+            
+            // 달력 업데이트 함수
+            function updateCalendar() {
+                // 요일 헤더를 제외한 모든 날짜 셀 제거
+                const dayElements = calendarContainer.querySelectorAll('.calendar-day:not(.calendar-day-name)');
+                dayElements.forEach(day => {
+                    if (day.parentNode === calendarContainer) {
+                        calendarContainer.removeChild(day);
+                    }
+                });
+                
+                // 새로 선택된 년도와 월로 달력 재생성
+                const selectedYear = parseInt(yearSelect.value);
+                const selectedMonth = parseInt(monthSelect.value);
+                createCalendar(selectedYear, selectedMonth, calendarContainer);
+                
+                // 출석체크 데이터 업데이트
+                updateAttendanceStats(selectedYear, selectedMonth);
+            }
+            
+            // 출석체크 통계 업데이트 함수
+            function updateAttendanceStats(year, month) {
+                const attendanceHistory = JSON.parse(localStorage.getItem('attendanceHistory')) || [];
+                
+                // 이번 달 출석일 계산
+                const monthlyCount = attendanceHistory.filter(dateStr => {
+                    const date = new Date(dateStr);
+                    return date.getFullYear() === year && date.getMonth() === month;
+                }).length;
+                
+                // 통계 업데이트
+                const monthlyAttendance = document.querySelectorAll('.attendance-number')[0];
+                monthlyAttendance.textContent = monthlyCount;
+            }
+            
+            // 출석체크 기록 가져오기
+            const attendanceHistory = JSON.parse(localStorage.getItem('attendanceHistory')) || [];
+            
+            // 오늘 출석 체크 여부 확인
+            const todayString = new Date().toDateString();
+            const attendedToday = attendanceHistory.includes(todayString);
+            
+            // 출석체크 버튼 이벤트 및 상태 업데이트
             const attendanceBtn = document.getElementById('attendanceBtn');
             if (attendanceBtn) {
+                // 이미 오늘 출석했다면 버튼 비활성화
+                if (attendedToday) {
+                    attendanceBtn.disabled = true;
+                    attendanceBtn.textContent = '오늘 출석완료!';
+                }
+                
                 attendanceBtn.addEventListener('click', function() {
                     // 오늘 날짜에 해당하는 요소 찾기
                     const todayElement = document.querySelector('.calendar-day.today');
                     if (todayElement) {
+                        // 달력에 출석 표시 추가
                         todayElement.classList.add('checked');
                         const checkIcon = document.createElement('i');
                         checkIcon.className = 'fas fa-check calendar-check';
                         todayElement.appendChild(checkIcon);
                         
+                        // 오늘 날짜를 기록에 추가
+                        if (!attendanceHistory.includes(todayString)) {
+                            attendanceHistory.push(todayString);
+                            localStorage.setItem('attendanceHistory', JSON.stringify(attendanceHistory));
+                            
+                            // 통계 업데이트
+                            const monthlyAttendance = document.querySelectorAll('.attendance-number')[0];
+                            const streak = document.querySelectorAll('.attendance-number')[1];
+                            const totalAttendance = document.querySelectorAll('.attendance-number')[2];
+                            
+                            monthlyAttendance.textContent = parseInt(monthlyAttendance.textContent) + 1;
+                            streak.textContent = parseInt(streak.textContent) + 1;
+                            totalAttendance.textContent = parseInt(totalAttendance.textContent) + 1;
+                            
+                            // 가상 재화 지급 (실제 구현은 데이터베이스에 저장해야 함)
+                            alert('출석체크 보상을 지급했습니다! (일반 상자 1개 + 골드 500)');
+                        }
+                        
                         // 버튼 비활성화
                         attendanceBtn.disabled = true;
                         attendanceBtn.textContent = '오늘 출석완료!';
-                        
-                        // 통계 업데이트 (예시)
-                        const monthlyAttendance = document.querySelectorAll('.attendance-number')[0];
-                        const streak = document.querySelectorAll('.attendance-number')[1];
-                        const totalAttendance = document.querySelectorAll('.attendance-number')[2];
-                        
-                        monthlyAttendance.textContent = parseInt(monthlyAttendance.textContent) + 1;
-                        streak.textContent = parseInt(streak.textContent) + 1;
-                        totalAttendance.textContent = parseInt(totalAttendance.textContent) + 1;
                     }
                 });
             }
@@ -284,6 +411,12 @@
         
         // 달력 생성 함수
         function createCalendar(year, month, container) {
+            // 날짜를 넣을 컨테이너 가져오기
+            const daysContainer = document.getElementById('calendar-days-container');
+            
+            // 이전 달력 날짜 삭제
+            daysContainer.innerHTML = '';
+            
             // 월의 첫 날
             const firstDay = new Date(year, month, 1);
             // 월의 마지막 날
@@ -296,7 +429,7 @@
             for (let i = 0; i < firstDayIndex; i++) {
                 const emptyDay = document.createElement('div');
                 emptyDay.className = 'calendar-day empty';
-                container.appendChild(emptyDay);
+                daysContainer.appendChild(emptyDay);
             }
             
             // 날짜 추가
@@ -315,16 +448,24 @@
                     dayElement.classList.add('today');
                 }
                 
-                // 예시 출석 체크 (랜덤)
-                if (i < today.getDate() && Math.random() > 0.3) {
+                // 실제 출석체크 데이터 기반으로 표시
+                // localStorage에서 출석체크 기록 확인
+                const attendanceHistory = JSON.parse(localStorage.getItem('attendanceHistory')) || [];
+                const checkDate = new Date(year, month, i).toDateString();
+                
+                if (attendanceHistory.includes(checkDate)) {
                     dayElement.classList.add('checked');
                     const checkIcon = document.createElement('i');
                     checkIcon.className = 'fas fa-check calendar-check';
                     dayElement.appendChild(checkIcon);
                 }
                 
-                container.appendChild(dayElement);
+                daysContainer.appendChild(dayElement);
             }
+            
+            // 현재 달 업데이트
+            document.querySelector('.attendance-header h1').innerHTML = 
+                '일일 출석체크 <span style="color: var(--primary-purple);">(' + (month + 1) + '월)</span>';
         }
     </script>
 </body>

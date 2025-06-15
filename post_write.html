@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>글쓰기 - 게임 아이템 거래소</title>
+    <link rel="stylesheet" href="css/common.css">
+    <style>
+        /* 게시판 스타일 */
+        .container {
+            width: 100%;
+            max-width: 1200px;
+            margin: 80px auto 0;
+            padding: 20px;
+        }
+        
+        .post-container {
+            background: #fff;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            padding: 20px;
+        }
+        
+        .post-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        .post-title {
+            font-size: 24px;
+            color: #333;
+            margin: 0;
+        }
+        
+        .form-group {
+            margin-bottom: 15px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        
+        .form-control {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 16px;
+        }
+        
+        .form-select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 16px;
+        }
+        
+        textarea.form-control {
+            min-height: 300px;
+            resize: vertical;
+        }
+        
+        .btn-group {
+            display: flex;
+            justify-content: flex-end;
+            margin-top: 20px;
+            gap: 10px;
+        }
+        
+        .btn-submit {
+            background-color: #4527a0;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        
+        .btn-cancel {
+            background-color: #6c757d;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+    </style>
+</head>
+<body>
+    <!-- 헤더 -->
+    <header class="header">
+        <a href="index.html" class="site-title">게임 아이템 거래소</a>
+        <button class="menu-btn" onclick="toggleMenu()">☰</button>
+    </header>
+
+    <!-- 사이드 메뉴 -->
+    <div class="side-menu">
+        <button class="side-menu-close" onclick="closeMenu()">×</button>
+        <a href="index.html" class="menu-item">홈</a>
+        <a href="attendance.html" class="menu-item">출석체크</a>
+        <a href="profile.html" class="menu-item">프로필</a>
+        <a href="community_board.html" class="menu-item">게시판</a>
+        <a href="login.html" class="menu-item">로그인</a>
+        <a href="register.html" class="menu-item">회원가입</a>
+    </div>
+    
+    <div class="container">
+        <!-- 글쓰기 폼 -->
+        <div class="post-container">
+            <div class="post-header">
+                <h2 class="post-title">게시글 작성</h2>
+            </div>
+            
+            <form id="postForm" onsubmit="submitPost(event)">
+                <div class="form-group">
+                    <label for="category">카테고리</label>
+                    <select id="category" name="category" class="form-select" required>
+                        <option value="" disabled selected>카테고리 선택</option>
+                        <option value="free">자유</option>
+                        <option value="info">정보</option>
+                        <option value="trade">거래</option>
+                        <option value="qna">문의</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="title">제목</label>
+                    <input type="text" id="title" name="title" class="form-control" placeholder="제목을 입력하세요" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="content">내용</label>
+                    <textarea id="content" name="content" class="form-control" placeholder="내용을 입력하세요" required></textarea>
+                </div>
+                
+                <div class="btn-group">
+                    <button type="button" onclick="location.href='community_board.html'" class="btn-cancel">취소</button>
+                    <button type="submit" class="btn-submit">등록하기</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="js/common.js"></script>
+    <script>
+        // 게시글 등록 함수
+        function submitPost(event) {
+            event.preventDefault();
+            
+            const category = document.getElementById('category').value;
+            const title = document.getElementById('title').value;
+            const content = document.getElementById('content').value;
+            
+            // 여기서는 간단히 로컬 스토리지에 저장하는 방식으로 구현 (실제로는 서버에 전송해야 함)
+            const posts = JSON.parse(localStorage.getItem('posts') || '[]');
+            const newPost = {
+                id: new Date().getTime(),
+                category,
+                title,
+                content,
+                author: localStorage.getItem('userNickname') || '익명',
+                date: new Date().toISOString().split('T')[0],
+                views: 0,
+                comments: []
+            };
+            
+            posts.push(newPost);
+            localStorage.setItem('posts', JSON.stringify(posts));
+            
+            alert('게시글이 등록되었습니다.');
+            window.location.href = 'post_view.html?id=' + newPost.id;
+        }
+    </script>
+</body>
+</html>

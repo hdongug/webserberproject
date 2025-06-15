@@ -1,0 +1,744 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>게시판 - 게임 아이템 거래소</title>
+    <link rel="stylesheet" href="css/common.css">
+    <style>
+        /* 게시판 스타일 */
+        .container {
+            width: 100%;
+            max-width: 1200px;
+            margin: 80px auto 0;
+            padding: 20px;
+        }
+        
+        .board-container {
+            background: #fff;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            padding: 20px;
+        }
+        
+        .board-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        .board-title {
+            font-size: 24px;
+            color: #333;
+            margin: 0;
+        }
+        
+        .tab-container {
+            display: flex;
+            border-bottom: 1px solid #ddd;
+            margin-bottom: 20px;
+        }
+        
+        .tab {
+            padding: 10px 20px;
+            cursor: pointer;
+            border: 1px solid transparent;
+            margin-bottom: -1px;
+        }
+        
+        .tab.active {
+            border-color: #ddd #ddd #fff #ddd;
+            background-color: #fff;
+            color: #4527a0;
+            font-weight: bold;
+        }
+        
+        .board-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        .board-table th {
+            background-color: #f8f9fa;
+            padding: 10px;
+            text-align: center;
+            border-bottom: 1px solid #ddd;
+        }
+        
+        .board-table td {
+            padding: 10px;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .board-table .center {
+            text-align: center;
+        }
+        
+        .board-table .notice {
+            background-color: #f8f5ff;
+        }
+        
+        .board-table a {
+            color: #333;
+            text-decoration: none;
+        }
+        
+        .board-table a:hover {
+            text-decoration: underline;
+            color: #4527a0;
+        }
+        
+        .new-tag {
+            background-color: #ff6b6b;
+            color: white;
+            font-size: 11px;
+            padding: 2px 5px;
+            border-radius: 3px;
+            margin-left: 5px;
+        }
+        
+        .pagination {
+            display: flex;
+            justify-content: center;
+            margin-top: 20px;
+        }
+        
+        .pagination a {
+            display: inline-block;
+            padding: 5px 10px;
+            margin: 0 3px;
+            border: 1px solid #ddd;
+            color: #333;
+            text-decoration: none;
+            border-radius: 3px;
+        }
+        
+        .pagination a.active {
+            background-color: #4527a0;
+            color: white;
+            border-color: #4527a0;
+        }
+        
+        .board-footer {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 20px;
+            align-items: center;
+        }
+        
+        .search-box {
+            display: flex;
+        }
+        
+        .search-box select {
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px 0 0 4px;
+        }
+        
+        .search-box input {
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-left: none;
+            border-right: none;
+            width: 200px;
+        }
+        
+        .search-box button {
+            padding: 8px 15px;
+            background-color: #4527a0;
+            color: white;
+            border: none;
+            border-radius: 0 4px 4px 0;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <!-- 헤더 -->
+    <header class="header">
+        <a href="index.html" class="site-title">게임 아이템 거래소</a>
+        <button class="menu-btn" onclick="toggleMenu()">☰</button>
+    </header>
+
+    <!-- 사이드 메뉴 -->
+    <div class="side-menu">
+        <button class="side-menu-close" onclick="closeMenu()">×</button>
+        <a href="index.html" class="menu-item">홈</a>
+        <a href="attendance.html" class="menu-item">출석체크</a>
+        <a href="profile.html" class="menu-item">프로필</a>
+        <a href="community_board.html" class="menu-item">게시판</a>
+        <a href="login.html" class="menu-item">로그인</a>
+        <a href="register.html" class="menu-item">회원가입</a>
+    </div>
+    
+    <div class="container">
+        <!-- 커뮤니티 게시판 -->
+        <div class="board-container">
+            <div class="board-header">
+                <h2 class="board-title">커뮤니티 게시판</h2>
+                <a href="post_write.html" class="btn">글쓰기</a>
+            </div>
+            
+            <!-- 게시판 탭 -->
+            <div class="tab-container">
+                <div class="tab active" data-tab="all">전체</div>
+                <div class="tab" data-tab="notice">공지사항</div>
+                <div class="tab" data-tab="free">자유</div>
+                <div class="tab" data-tab="info">정보</div>
+                <div class="tab" data-tab="trade">거래</div>
+                <div class="tab" data-tab="qna">문의</div>
+            </div>
+            
+            <!-- 게시물 테이블 -->
+            <table class="board-table">
+                <thead>
+                    <tr>
+                        <th width="7%">번호</th>
+                        <th>제목</th>
+                        <th width="12%">작성자</th>
+                        <th width="12%">작성일</th>
+                        <th width="7%">조회</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- 공지 게시물 -->
+                    <tr class="notice">
+                        <td class="center"><span style="color: #4527a0; font-weight: bold;">공지</span></td>
+                        <td><a href="post_view.html?id=1">게임 아이템 거래소 이용 규칙 안내</a> <span class="new-tag">NEW</span></td>
+                        <td class="center">운영자</td>
+                        <td class="center">2025-06-10</td>
+                        <td class="center">1,245</td>
+                    </tr>
+                    <tr class="notice">
+                        <td class="center"><span style="color: #4527a0; font-weight: bold;">공지</span></td>
+                        <td><a href="post_view.html?id=2">6월 업데이트 안내 및 점검 일정</a></td>
+                        <td class="center">운영자</td>
+                        <td class="center">2025-06-08</td>
+                        <td class="center">982</td>
+                    </tr>
+                    <!-- 일반 게시물 -->
+                    <tr>
+                        <td class="center">102</td>
+                        <td><a href="post_view.html?id=3">레전더리 무기 거래 하실 분 있나요?</a> <span class="new-tag">NEW</span></td>
+                        <td class="center">김과123</td>
+                        <td class="center">2025-06-14</td>
+                        <td class="center">42</td>
+                    </tr>
+                    <tr>
+                        <td class="center">101</td>
+                        <td><a href="post_view.html?id=4">아이템 강화 성공률 질문입니다</a></td>
+                        <td class="center">마법사1999</td>
+                        <td class="center">2025-06-13</td>
+                        <td class="center">78</td>
+                    </tr>
+                    <tr>
+                        <td class="center">100</td>
+                        <td><a href="post_view.html?id=5">신규 던전 공략 정보 공유합니다</a></td>
+                        <td class="center">진사왕</td>
+                        <td class="center">2025-06-13</td>
+                        <td class="center">156</td>
+                    </tr>
+                    <tr>
+                        <td class="center">99</td>
+                        <td><a href="post_view.html?id=6">아이템 거래 시 주의사항 (팁)</a></td>
+                        <td class="center">상인길드</td>
+                        <td class="center">2025-06-12</td>
+                        <td class="center">93</td>
+                    </tr>
+                    <tr>
+                        <td class="center">98</td>
+                        <td><a href="post_view.html?id=7">고급 방어구 세트 판매합니다!</a></td>
+                        <td class="center">대장장이55</td>
+                        <td class="center">2025-06-12</td>
+                        <td class="center">102</td>
+                    </tr>
+                    <tr>
+                        <td class="center">97</td>
+                        <td><a href="post_view.html?id=8">주간 보스 레이드 파티원 모집</a></td>
+                        <td class="center">길리번</td>
+                        <td class="center">2025-06-11</td>
+                        <td class="center">67</td>
+                    </tr>
+                    <tr>
+                        <td class="center">96</td>
+                        <td><a href="post_view.html?id=9">거래소 서기 당할 새대 공유</a></td>
+                        <td class="center">솜프도적</td>
+                        <td class="center">2025-06-11</td>
+                        <td class="center">214</td>
+                    </tr>
+                    <tr>
+                        <td class="center">95</td>
+                        <td><a href="post_view.html?id=10">레어 아이템 효율적으로 파밍하는 방법</a></td>
+                        <td class="center">정보통123</td>
+                        <td class="center">2025-06-10</td>
+                        <td class="center">187</td>
+                    </tr>
+                </tbody>
+            </table>
+            
+            <!-- 페이지네이션 -->
+            <div class="pagination">
+                <a href="#">&laquo;</a>
+                <a href="#">&lt;</a>
+                <a href="#">1</a>
+                <a href="#" class="active">2</a>
+                <a href="#">3</a>
+                <a href="#">4</a>
+                <a href="#">5</a>
+                <a href="#">&gt;</a>
+                <a href="#">&raquo;</a>
+            </div>
+            
+            <!-- 검색 -->
+            <div class="board-footer">
+                <div></div>
+                <div class="search-box">
+                    <select>
+                        <option value="title">제목</option>
+                        <option value="content">내용</option>
+                        <option value="author">작성자</option>
+                        <option value="all">제목+내용</option>
+                    </select>
+                    <input type="text" placeholder="검색어를 입력하세요">
+                    <button>검색</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/common.js"></script>
+    <script>
+        document.querySelector('.tab-container').addEventListener('click', function(e) {
+            if (e.target.classList.contains('tab')) {
+                const tabId = e.target.getAttribute('data-tab');
+                
+                // 탭 스타일 변경
+                document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
+                e.target.classList.add('active');
+                
+                // 테이블 필터링 로직 (실제로는 AJAX로 데이터를 가져와야 함)
+                console.log(`탭 ${tabId}이(가) 선택되었습니다.`);
+            }
+        });
+    </script>
+</body>
+</html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>게시판 - 게임 아이템 거래소</title>
+    <link rel="stylesheet" href="css/common.css">
+        
+        .site-title {
+            font-size: 24px;
+            font-weight: bold;
+            color: white;
+            text-decoration: none;
+        }
+        
+        .menu-btn {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 24px;
+            cursor: pointer;
+        }
+        
+        /* 사이드 메뉴 스타일 */
+        .side-menu {
+            position: fixed;
+            top: 0;
+            right: 0;
+            width: 250px;
+            height: 100%;
+            background-color: #fff;
+            box-shadow: -2px 0 5px rgba(0, 0, 0, 0.1);
+            transform: translateX(100%);
+            transition: transform 0.3s ease;
+            z-index: 1000;
+            padding: 20px;
+        }
+        
+        .side-menu.open {
+            transform: translateX(0);
+        }
+        
+        .close-btn {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: none;
+            border: none;
+            font-size: 20px;
+            cursor: pointer;
+        }
+        
+        .menu-list {
+            margin-top: 50px;
+            list-style: none;
+        }
+        
+        .menu-list a {
+            display: block;
+            padding: 12px 5px;
+            color: #333;
+            text-decoration: none;
+            border-bottom: 1px solid #eee;
+            font-size: 16px;
+        }
+        
+        .menu-list a:hover {
+            background-color: #f8f9fa;
+        }
+        
+        .menu-list i {
+            margin-right: 10px;
+            width: 20px;
+            text-align: center;
+        }
+        
+        /* 컨테이너 */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        /* 게시판 스타일 */
+        .board-container {
+            background: #fff;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .board-title {
+            font-size: 22px;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #4527a0;
+            color: #333;
+        }
+        
+        .board-tabs {
+            display: flex;
+            border-bottom: 1px solid #ddd;
+            margin-bottom: 20px;
+        }
+        
+        .board-tab {
+            padding: 10px 15px;
+            cursor: pointer;
+            margin-right: 5px;
+            border: 1px solid #ddd;
+            border-bottom: none;
+            border-radius: 5px 5px 0 0;
+            background-color: #f9f9f9;
+        }
+        
+        .board-tab.active {
+            background-color: white;
+            font-weight: 500;
+            border-bottom: 2px solid white;
+            margin-bottom: -1px;
+            color: #4527a0;
+        }
+        
+        .notice {
+            background-color: #f8f8ff;
+        }
+        
+        .board-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        .board-table th,
+        .board-table td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .board-table th {
+            font-weight: 600;
+            color: #555;
+            background-color: #f9f9f9;
+        }
+        
+        .board-table .center {
+            text-align: center;
+        }
+        
+        .board-table .title {
+            width: 50%;
+        }
+        
+        .board-table tr:hover {
+            background-color: #f9f9f9;
+        }
+        
+        .board-table a {
+            color: #333;
+            text-decoration: none;
+        }
+        
+        .board-table a:hover {
+            color: #4527a0;
+            text-decoration: underline;
+        }
+        
+        .new-tag {
+            display: inline-block;
+            background-color: #ff4757;
+            color: white;
+            font-size: 11px;
+            padding: 2px 5px;
+            border-radius: 3px;
+            margin-left: 5px;
+        }
+        
+        .pagination {
+            display: flex;
+            justify-content: center;
+            margin-top: 20px;
+        }
+        
+        .pagination a {
+            display: inline-block;
+            padding: 8px 12px;
+            margin: 0 5px;
+            border-radius: 4px;
+            border: 1px solid #ddd;
+            color: #333;
+            text-decoration: none;
+        }
+        
+        .pagination a:hover {
+            background-color: #f5f5f5;
+        }
+        
+        .pagination .active {
+            background-color: #4527a0;
+            color: white;
+            border-color: #4527a0;
+        }
+        
+        .board-footer {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 20px;
+        }
+        
+        .write-btn {
+            padding: 8px 15px;
+            background-color: #4527a0;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        
+        .search-box {
+            display: flex;
+        }
+        
+        .search-select {
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px 0 0 4px;
+            outline: none;
+        }
+        
+        .search-input {
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-right: none;
+            outline: none;
+        }
+        
+        .search-btn {
+            padding: 8px 15px;
+            background-color: #4527a0;
+            color: white;
+            border: none;
+            border-radius: 0 4px 4px 0;
+            cursor: pointer;
+        }
+        
+        /* 반응형 */
+        @media (max-width: 768px) {
+            .board-table th:nth-child(2),
+            .board-table td:nth-child(2),
+            .board-table th:nth-child(4),
+            .board-table td:nth-child(4) {
+                display: none;
+            }
+            
+            .search-box {
+                width: 100%;
+                margin-top: 10px;
+            }
+            
+            .board-footer {
+                flex-direction: column-reverse;
+            }
+            
+            .write-btn {
+                width: 100%;
+                margin-top: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- 헤더 -->
+    <header class="header">
+        <a href="index.html" class="site-title">게임 아이템 거래소</a>
+        <button class="menu-btn" onclick="toggleMenu()">☰</button>
+    </header>
+
+    <!-- 사이드 메뉴 -->
+    <div class="side-menu">
+        <button class="side-menu-close" onclick="closeMenu()">×</button>
+        <a href="index.html" class="menu-item">홈</a>
+        <a href="attendance.html" class="menu-item">출석체크</a>
+        <a href="profile.html" class="menu-item">프로필</a>
+        <a href="community_board.html" class="menu-item">게시판</a>
+            
+            <!-- 게시판 탭 -->
+            <div class="board-tabs">
+                <div class="board-tab active">전체</div>
+                <div class="board-tab">공지사항</div>
+                <div class="board-tab">자유</div>
+                <div class="board-tab">정보</div>
+                <div class="board-tab">거래</div>
+                <div class="board-tab">패치</div>
+            </div>
+            
+            <!-- 게시판 테이블 -->
+            <table class="board-table">
+                <thead>
+                    <tr>
+                        <th class="center" style="width: 8%;">번호</th>
+                        <th class="title">제목</th>
+                        <th class="center" style="width: 12%;">작성자</th>
+                        <th class="center" style="width: 12%;">작성일</th>
+                        <th class="center" style="width: 8%;">조회</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- 공지 게시물 -->
+                    <tr class="notice">
+                        <td class="center"><span style="color: #4527a0; font-weight: bold;">공지</span></td>
+                        <td><a href="post_view.html?id=1">게임 아이템 거래소 이용 규칙 안내</a> <span class="new-tag">NEW</span></td>
+                        <td class="center">운영자</td>
+                        <td class="center">2025-06-10</td>
+                        <td class="center">1,245</td>
+                    </tr>
+                    <tr class="notice">
+                        <td class="center"><span style="color: #4527a0; font-weight: bold;">공지</span></td>
+                        <td><a href="post_view.html?id=2">6월 업데이트 안내 및 점검 일정</a></td>
+                        <td class="center">운영자</td>
+                        <td class="center">2025-06-08</td>
+                        <td class="center">982</td>
+                    </tr>
+                    
+                    <!-- 일반 게시물 -->
+                    <tr>
+                        <td class="center">102</td>
+                        <td><a href="post_view.html?id=3">레전더리 무기 거래 이벤트 상세 정보</a> <span class="new-tag">NEW</span></td>
+                        <td class="center">김과123</td>
+                        <td class="center">2025-06-14</td>
+                        <td class="center">42</td>
+                    </tr>
+                    <tr>
+                        <td class="center">101</td>
+                        <td><a href="post_view.html?id=4">아이템 강화 성공률 질문입니다</a></td>
+                        <td class="center">마법사1999</td>
+                        <td class="center">2025-06-13</td>
+                        <td class="center">78</td>
+                    </tr>
+                    <tr>
+                        <td class="center">100</td>
+                        <td><a href="post_view.html?id=5">신규 던전 공략 정보 공유합니다</a></td>
+                        <td class="center">진사왕</td>
+                        <td class="center">2025-06-13</td>
+                        <td class="center">156</td>
+                    </tr>
+                    <tr>
+                        <td class="center">99</td>
+                        <td><a href="post_view.html?id=6">아이템 거래 시 주의사항 안내</a></td>
+                        <td class="center">상인길드</td>
+                        <td class="center">2025-06-12</td>
+                        <td class="center">93</td>
+                    </tr>
+                    <tr>
+                        <td class="center">98</td>
+                        <td><a href="post_view.html?id=7">고급 방어구 세트 판매합니다!</a></td>
+                        <td><a href="#">고급 방어구 세트 판매합니다!</a></td>
+                        <td class="center">대장장이55</td>
+                        <td class="center">2025-06-12</td>
+                        <td class="center">102</td>
+                    </tr>
+                    <tr>
+                        <td class="center">97</td>
+                        <td><a href="#">주간 보스 레이드 피티합니다</a></td>
+                        <td class="center">길러먼</td>
+                        <td class="center">2025-06-11</td>
+                        <td class="center">67</td>
+                    </tr>
+                    <tr>
+                        <td class="center">96</td>
+                        <td><a href="#">거래소 서기 당한 사례 공유</a></td>
+                        <td class="center">슬픈도적</td>
+                        <td class="center">2025-06-11</td>
+                        <td class="center">214</td>
+                    </tr>
+                    <tr>
+                        <td class="center">95</td>
+                        <td><a href="#">레어 아이템 효율적으로 파밍하는 방법</a></td>
+                        <td class="center">정보통123</td>
+                        <td class="center">2025-06-10</td>
+                        <td class="center">187</td>
+                    </tr>
+                </tbody>
+            </table>
+            
+            <!-- 페이지네이션 -->
+            <div class="pagination">
+                <a href="#">&laquo;</a>
+                <a href="#">&lt;</a>
+                <a href="#">1</a>
+                <a href="#" class="active">2</a>
+                <a href="#">3</a>
+                <a href="#">4</a>
+                <a href="#">5</a>
+                <a href="#">&gt;</a>
+                <a href="#">&raquo;</a>
+            </div>
+            
+            <!-- 게시판 푸터 (검색, 글쓰기) -->
+            <div class="board-footer">
+                <button class="write-btn">글쓰기</button>
+                <div class="search-box">
+                    <select class="search-select">
+                        <option>제목</option>
+                        <option>내용</option>
+                        <option>작성자</option>
+                        <option>제목+내용</option>
+                    </select>
+                    <input type="text" class="search-input" placeholder="검색어를 입력하세요">
+                    <button class="search-btn">검색</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/common.js"></script>
+</body>
+</html>

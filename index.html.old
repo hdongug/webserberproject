@@ -1,0 +1,923 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>게임 아이템 거래소 - 홈</title>
+    <link rel="stylesheet" href="css/common.css">
+    <style>
+        .container {
+            width: 100%;
+            max-width: 1200px;
+            margin: 80px auto 0;
+            padding: 20px;
+        }
+        
+        .guide-container {
+            background: #fff;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            padding: 30px;
+            margin-bottom: 30px;
+        }
+        
+        .guide-title {
+            font-size: 28px;
+            color: #4527a0;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        
+        .guide-content {
+            line-height: 1.8;
+        }
+        
+        .guide-section {
+            margin-bottom: 20px;
+            padding-bottom: 20px;
+            border-bottom: 1px dashed #ddd;
+        }
+        
+        .guide-section:last-child {
+            border-bottom: none;
+        }
+        
+        .guide-section h3 {
+            color: #4527a0;
+            margin-bottom: 10px;
+            font-size: 20px;
+        }
+        
+        .guide-section p {
+            color: #444;
+            margin-bottom: 10px;
+        }
+        
+        .step-list {
+            margin-left: 20px;
+            margin-bottom: 15px;
+        }
+        
+        .step-list li {
+            margin-bottom: 8px;
+        }
+        
+        .highlight {
+            background-color: #f0ecff;
+            padding: 15px;
+            border-radius: 5px;
+            border-left: 4px solid #4527a0;
+            margin: 20px 0;
+        }
+        
+        .btn-container {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 30px;
+        }
+        
+        .recommended-items {
+            margin-top: 30px;
+        }
+        
+        .recommended-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        
+        .refresh-time {
+            font-size: 14px;
+            color: #666;
+        }
+        
+        .recommended-items-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 20px;
+        }
+        
+        .item {
+            border: 1px solid #eee;
+            border-radius: 8px;
+            overflow: hidden;
+            transition: transform 0.3s;
+        }
+        
+        .item:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        
+        .item-image {
+            height: 150px;
+            overflow: hidden;
+        }
+        
+        .item-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        .item-info {
+            padding: 10px;
+        }
+        
+        .item-info h4 {
+            margin-bottom: 5px;
+            font-size: 16px;
+        }
+        
+        .item-price {
+            color: #e91e63;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <!-- 헤더 -->
+    <header class="header">
+        <a href="index.html" class="site-title">게임 아이템 거래소</a>
+        <button class="menu-btn" onclick="toggleMenu()">☰</button>
+    </header>
+
+    <!-- 사이드 메뉴 -->
+    <div class="side-menu">
+        <button class="side-menu-close" onclick="closeMenu()">×</button>
+        <a href="index.html" class="menu-item">홈</a>
+        <a href="attendance.html" class="menu-item">출석체크</a>
+        <a href="profile.html" class="menu-item">프로필</a>
+        <a href="community_board.html" class="menu-item">게시판</a>
+        <a href="login.html" class="menu-item">로그인</a>
+        <a href="register.html" class="menu-item">회원가입</a>
+    </div>
+    
+    <div class="container">
+        <!-- 가이드 정보 -->
+        <div class="guide-container">
+            <h2 class="guide-title">게임 아이템 거래소에 오신 것을 환영합니다!</h2>
+            
+            <div class="guide-content">
+                <div class="guide-section">
+                    <h3>환영합니다!</h3>
+                    <p>처음 접속을 하셨다면 아래의 단계를 따라 시작해보세요:</p>
+                    <ol class="step-list">
+                        <li>
+                            <strong>회원가입</strong> - 먼저 회원가입을 하여 계정을 만듭니다.
+                        </li>
+                        <li>
+                            <strong>로그인</strong> - 계정을 생성한 후 로그인하여 모든 기능을 이용하세요.
+                        </li>
+                    </ol>
+                </div>
+                
+                <div class="highlight">
+                    <p>화려한 이벤트와 다양한 아이템의 거래소에 오신 것을 환영합니다! 여기서는 여러분의 게임 경험을 향상시킬 수 있는 다양한 아이템을 구매하고 판매할 수 있습니다.</p>
+                </div>
+                
+                <div class="guide-section">
+                    <h3>출석체크와 재화 획득</h3>
+                    <p>매일 출석체크를 하면 재화를 얻을 수 있습니다. 이 재화는 거래소에서 아이템을 구매하는데 사용됩니다.</p>
+                    <ul class="step-list">
+                        <li>매일 출석체크 페이지에 방문하세요.</li>
+                        <li>출석체크 버튼을 클릭하세요.</li>
+                        <li>연속 출석시 추가 보너스가 제공됩니다!</li>
+                    </ul>
+                </div>
+                
+                <div class="guide-section">
+                    <h3>아이템 구매</h3>
+                    <p>거래소에서는 다양한 게임 아이템을 구매할 수 있습니다:</p>
+                    <ul class="step-list">
+                        <li>거래소 페이지에서 원하는 아이템을 찾아보세요.</li>
+                        <li>현재 보유하고 있는 재화로 아이템을 구매하세요.</li>
+                        <li>구매한 아이템은 바로 인벤토리에 추가됩니다.</li>
+                    </ul>
+                </div>
+                
+                <div class="guide-section">
+                    <h3>아이템 판매</h3>
+                    <p>자신의 창고(인벤토리)에서 아이템을 판매할 수도 있습니다:</p>
+                    <ul class="step-list">
+                        <li>창고 페이지에서 판매하고 싶은 아이템을 선택하세요.</li>
+                        <li>판매 가격을 설정하고 등록 버튼을 클릭하세요.</li>
+                        <li>다른 사용자가 구매하면 재화가 자동으로 충전됩니다.</li>
+                    </ul>
+                </div>
+                
+                <div class="btn-container">
+                    <a href="register.html" class="btn">회원가입</a>
+                    <a href="login.html" class="btn">로그인</a>
+                    <a href="attendance.html" class="btn">출석체크</a>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 추천 아이템 -->
+        <div class="content-box recommended-items">
+            <div class="recommended-header">
+                <h3 class="content-title">추천 아이템</h3>
+                <span class="refresh-time">30분마다 갱신됩니다</span>
+            </div>
+            <div class="recommended-items-list">
+                <!-- 추천 아이템은 JS에서 동적으로 생성됨 -->
+            </div>
+        </div>
+    </div>
+
+    <script src="js/common.js"></script>
+</body>
+</html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>게임 아이템 거래소 - 홈</title>
+    <link rel="stylesheet" href="css/common.css">
+    <style>
+        .recommended-items {
+            margin-bottom: 30px;
+        }
+        
+        .recommended-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        
+        .refresh-time {
+            font-size: 14px;
+            color: #666;
+        }
+        
+        .recommended-items-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 20px;
+        }
+        
+        .item {
+            border: 1px solid #eee;
+            border-radius: 8px;
+            overflow: hidden;
+            transition: transform 0.3s;
+        }
+        
+        .item:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        
+        .item-image {
+            height: 150px;
+            overflow: hidden;
+        }
+        
+        .item-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        .item-info {
+            padding: 15px;
+        }
+        
+        .item-info h4 {
+            margin: 0 0 8px 0;
+            font-size: 16px;
+        }
+        
+        .item-price {
+            font-weight: bold;
+            color: #4527a0;
+        }
+        
+        .popular-trades {
+            margin-bottom: 30px;
+        }
+        
+        .trade-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 12px 0;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .trade-item {
+            font-weight: 500;
+        }
+        
+        .trade-price {
+            color: #4527a0;
+            font-weight: bold;
+        }
+        
+        .recent-posts {
+            margin-bottom: 30px;
+        }
+        
+        .post-item {
+            padding: 12px 0;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .post-title {
+            font-weight: 500;
+            margin-bottom: 5px;
+        }
+        
+        .post-meta {
+            font-size: 12px;
+            color: #666;
+        }
+    </style>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', 'Malgun Gothic', sans-serif;
+        }
+        
+        body {
+            background: #f8f9fa;
+            color: #333;
+            line-height: 1.6;
+        }
+        
+        /* 헤더 스타일 */
+        .header {
+            background-color: #4527a0;
+            color: #fff;
+            padding: 10px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .site-title {
+            font-size: 24px;
+            font-weight: bold;
+            color: white;
+            text-decoration: none;
+        }
+        
+        .menu-btn {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 24px;
+            cursor: pointer;
+        }
+        
+        /* 사이드 메뉴 스타일 */
+        .side-menu {
+            position: fixed;
+            top: 0;
+            right: 0;
+            width: 250px;
+            height: 100%;
+            background-color: #fff;
+            box-shadow: -2px 0 5px rgba(0, 0, 0, 0.1);
+            transform: translateX(100%);
+            transition: transform 0.3s ease;
+            z-index: 1000;
+            padding: 20px;
+        }
+        
+        .side-menu.show {
+            transform: translateX(0);
+        }
+        
+        .close-btn {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: none;
+            border: none;
+            font-size: 20px;
+            cursor: pointer;
+        }
+        
+        .menu-list {
+            margin-top: 50px;
+            list-style: none;
+        }
+        
+        .menu-list a {
+            display: block;
+            padding: 12px 5px;
+            color: #333;
+            text-decoration: none;
+            border-bottom: 1px solid #eee;
+            font-size: 16px;
+        }
+        
+        .menu-list a:hover {
+            background-color: #f8f9fa;
+        }
+        
+        .menu-list i {
+            margin-right: 10px;
+            width: 20px;
+            text-align: center;
+        }
+        
+        /* 컨테이너 */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        /* 게시판 스타일 */
+        .board-container {
+            background: #fff;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .board-title {
+            font-size: 22px;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #4527a0;
+            color: #333;
+        }
+        
+        .board-tabs {
+            display: flex;
+            border-bottom: 1px solid #ddd;
+            margin-bottom: 20px;
+        }
+        
+        .board-tab {
+            padding: 10px 15px;
+            cursor: pointer;
+            margin-right: 5px;
+            border: 1px solid #ddd;
+            border-bottom: none;
+            border-radius: 5px 5px 0 0;
+            background-color: #f9f9f9;
+        }
+        
+        .board-tab.active {
+            background-color: white;
+            font-weight: 500;
+            border-bottom: 2px solid white;
+            margin-bottom: -1px;
+            color: #4527a0;
+        }
+        
+        .notice {
+            background-color: #f8f8ff;
+        }
+        
+        .board-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        .board-table th,
+        .board-table td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .board-table th {
+            font-weight: 600;
+            color: #555;
+            background-color: #f9f9f9;
+        }
+        
+        .board-table .center {
+            text-align: center;
+        }
+        
+        .board-table .title {
+            width: 50%;
+        }
+        
+        .board-table tr:hover {
+            background-color: #f9f9f9;
+        }
+        
+        .board-table a {
+            color: #333;
+            text-decoration: none;
+        }
+        
+        .board-table a:hover {
+            color: #4527a0;
+            text-decoration: underline;
+        }
+        
+        .new-tag {
+            display: inline-block;
+            background-color: #ff4757;
+            color: white;
+            font-size: 11px;
+            padding: 2px 5px;
+            border-radius: 3px;
+            margin-left: 5px;
+        }
+        
+        .pagination {
+            display: flex;
+            justify-content: center;
+            margin-top: 20px;
+        }
+        
+        .pagination a {
+            display: inline-block;
+            padding: 8px 12px;
+            margin: 0 5px;
+            border-radius: 4px;
+            border: 1px solid #ddd;
+            color: #333;
+            text-decoration: none;
+        }
+        
+        .pagination a:hover {
+            background-color: #f5f5f5;
+        }
+        
+        .pagination .active {
+            background-color: #4527a0;
+            color: white;
+            border-color: #4527a0;
+        }
+        
+        .board-footer {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 20px;
+        }
+        
+        .write-btn {
+            padding: 8px 15px;
+            background-color: #4527a0;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        
+        .search-box {
+            display: flex;
+        }
+        
+        .search-select {
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px 0 0 4px;
+            outline: none;
+        }
+        
+        .search-input {
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-right: none;
+            outline: none;
+        }
+        
+        .search-btn {
+            padding: 8px 15px;
+            background-color: #4527a0;
+            color: white;
+            border: none;
+            border-radius: 0 4px 4px 0;
+            cursor: pointer;
+        }
+        
+        /* 반응형 */
+        @media (max-width: 768px) {
+            .board-table th:nth-child(2),
+            .board-table td:nth-child(2),
+            .board-table th:nth-child(4),
+            .board-table td:nth-child(4) {
+                display: none;
+            }
+            
+            .search-box {
+                width: 100%;
+                margin-top: 10px;
+            }
+            
+            .board-footer {
+                flex-direction: column-reverse;
+            }
+            
+            .write-btn {
+                width: 100%;
+                margin-top: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- 헤더 -->
+    <header class="header">
+        <a href="#" class="site-title">게임 아이템 거래소</a>
+        <button class="menu-btn" onclick="toggleMenu()">☰</button>
+    </header>
+    
+    <!-- 사이드 메뉴 -->
+    <div class="side-menu" id="sideMenu">
+        <button class="close-btn" onclick="toggleMenu()">✕</button>
+        <ul class="menu-list">
+            <li><a href="#"><i>🏠</i> 홈</a></li>
+            <li><a href="#"><i>💬</i> 게시판</a></li>
+            <li><a href="#"><i>🔔</i> 공지</a></li>
+            <li><a href="#"><i>🎮</i> 게시판</a></li>
+            <li><a href="#"><i>📄</i> 출석체크</a></li>
+            <li><a href="#"><i>👤</i> 회원정보</a></li>
+            <li><a href="#"><i>🔒</i> 로그인</a></li>
+        </ul>
+    </div>
+    
+    <div class="container">
+        <!-- 커뮤니티 게시판 -->
+        <div class="board-container">
+            <h2 class="board-title">커뮤니티 게시판</h2>
+            
+            <!-- 게시판 탭 -->
+            <div class="board-tabs">
+                <div class="board-tab active">전체</div>
+                <div class="board-tab">공지사항</div>
+                <div class="board-tab">자유</div>
+                <div class="board-tab">정보</div>
+                <div class="board-tab">거래</div>
+                <div class="board-tab">패치</div>
+            </div>
+            
+            <!-- 게시판 테이블 -->
+            <table class="board-table">
+                <thead>
+                    <tr>
+                        <th class="center" style="width: 8%;">번호</th>
+                        <th class="title">제목</th>
+                        <th class="center" style="width: 12%;">작성자</th>
+                        <th class="center" style="width: 12%;">작성일</th>
+                        <th class="center" style="width: 8%;">조회</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- 공지 게시물 -->
+                    <tr class="notice">
+                        <td class="center"><span style="color: #4527a0; font-weight: bold;">공지</span></td>
+                        <td><a href="#">게임 아이템 거래소 이용 규칙 안내</a> <span class="new-tag">NEW</span></td>
+                        <td class="center">운영자</td>
+                        <td class="center">2025-06-10</td>
+                        <td class="center">1,245</td>
+                    </tr>
+                    <tr class="notice">
+                        <td class="center"><span style="color: #4527a0; font-weight: bold;">공지</span></td>
+                        <td><a href="#">6월 업데이트 안내 및 점검 완료</a></td>
+                        <td class="center">운영자</td>
+                        <td class="center">2025-06-08</td>
+                        <td class="center">982</td>
+                    </tr>
+                    
+                    <!-- 일반 게시물 -->
+                    <tr>
+                        <td class="center">102</td>
+                        <td><a href="#">레전더리 무기 가래 하실 분 있나요?</a> <span class="new-tag">NEW</span></td>
+                        <td class="center">김과123</td>
+                        <td class="center">2025-06-14</td>
+                        <td class="center">42</td>
+                    </tr>
+                    <tr>
+                        <td class="center">101</td>
+                        <td><a href="#">아이템 강화 성공률 질문입니다</a></td>
+                        <td class="center">마법사1999</td>
+                        <td class="center">2025-06-13</td>
+                        <td class="center">78</td>
+                    </tr>
+                    <tr>
+                        <td class="center">100</td>
+                        <td><a href="#">신규 던전 공략 정보 공유합니다</a></td>
+                        <td class="center">진사왕</td>
+                        <td class="center">2025-06-13</td>
+                        <td class="center">156</td>
+                    </tr>
+                    <tr>
+                        <td class="center">99</td>
+                        <td><a href="#">아이템 거래 시 주의사항 (팁)</a></td>
+                        <td class="center">상인길드</td>
+                        <td class="center">2025-06-12</td>
+                        <td class="center">93</td>
+                    </tr>
+                    <tr>
+                        <td class="center">98</td>
+                        <td><a href="#">고급 방어구 세트 판매합니다!</a></td>
+                        <td class="center">대장장이55</td>
+                        <td class="center">2025-06-12</td>
+                        <td class="center">102</td>
+                    </tr>
+                    <tr>
+                        <td class="center">97</td>
+                        <td><a href="#">주간 보스 레이드 피티합니다</a></td>
+                        <td class="center">길러먼</td>
+                        <td class="center">2025-06-11</td>
+                        <td class="center">67</td>
+                    </tr>
+                    <tr>
+                        <td class="center">96</td>
+                        <td><a href="#">거래소 서기 당한 사례 공유</a></td>
+                        <td class="center">슬픈도적</td>
+                        <td class="center">2025-06-11</td>
+                        <td class="center">214</td>
+                    </tr>
+                    <tr>
+                        <td class="center">95</td>
+                        <td><a href="#">레어 아이템 효율적으로 파밍하는 방법</a></td>
+                        <td class="center">정보통123</td>
+                        <td class="center">2025-06-10</td>
+                        <td class="center">187</td>
+                    </tr>
+                </tbody>
+            </table>
+            
+            <!-- 페이지네이션 -->
+            <div class="pagination">
+                <a href="#">&laquo;</a>
+                <a href="#">&lt;</a>
+                <a href="#">1</a>
+                <a href="#" class="active">2</a>
+                <a href="#">3</a>
+                <a href="#">4</a>
+                <a href="#">5</a>
+                <a href="#">&gt;</a>
+                <a href="#">&raquo;</a>
+            </div>
+            
+            <!-- 게시판 푸터 (검색, 글쓰기) -->
+            <div class="board-footer">
+                <button class="write-btn">글쓰기</button>
+                <div class="search-box">
+                    <select class="search-select">
+                        <option>제목</option>
+                        <option>내용</option>
+                        <option>작성자</option>
+                        <option>제목+내용</option>
+                    </select>
+                    <input type="text" class="search-input" placeholder="검색어를 입력하세요">
+                    <button class="search-btn">검색</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 사이드 메뉴 토글 함수
+        function toggleMenu() {
+            const sideMenu = document.getElementById('sideMenu');
+            sideMenu.classList.toggle('show');
+        }
+        
+        // 게시판 탭 전환
+        document.querySelectorAll('.board-tab').forEach(tab => {
+            tab.addEventListener('click', () => {
+                document.querySelectorAll('.board-tab').forEach(t => t.classList.remove('active'));
+                tab.classList.add('active');
+            });
+        });
+    </script>
+    <header class="header">
+        <a href="index.html" class="site-title">게임 아이템 거래소</a>
+        <button class="menu-btn" onclick="toggleMenu()">☰</button>
+    </header>
+    
+    <!-- 사이드 메뉴 -->
+    <div class="side-menu">
+        <button class="side-menu-close" onclick="closeMenu()">×</button>
+        <a href="index.html" class="menu-item">홈</a>
+        <a href="attendance.html" class="menu-item">출석체크</a>
+        <a href="profile.html" class="menu-item">프로필</a>
+        <a href="community_board.html" class="menu-item">게시판</a>
+        <a href="login.html" class="menu-item">로그인</a>
+        <a href="register.html" class="menu-item">회원가입</a>
+    </div>
+    
+    <div class="container">
+        <!-- 메인 콘텐츠 영역 -->
+        
+        <!-- 로그인 섹션 -->
+        <div class="content-box login-section">
+            <!-- 로그인 폼 또는 사용자 정보는 JS에서 동적으로 생성됨 -->
+        </div>
+        
+        <!-- 추천 아이템 -->
+        <div class="content-box recommended-items">
+            <div class="recommended-header">
+                <h3 class="content-title">추천 아이템</h3>
+                <span class="refresh-time">30분마다 갱신됩니다</span>
+            </div>
+            <div class="recommended-items-list">
+                <!-- 추천 아이템은 JS에서 동적으로 생성됨 -->
+                <div class="item">
+                    <div class="item-image">
+                        <img src="img/default-item.png" alt="드래곤 슬레이어">
+                    </div>
+                    <div class="item-info">
+                        <h4>드래곤 슬레이어</h4>
+                        <p class="item-price">120,000원</p>
+                    </div>
+                </div>
+                <div class="item">
+                    <div class="item-image">
+                        <img src="img/default-item.png" alt="미스릴 갑옷">
+                    </div>
+                    <div class="item-info">
+                        <h4>미스릴 갑옷</h4>
+                        <p class="item-price">180,000원</p>
+                    </div>
+                </div>
+                <div class="item">
+                    <div class="item-image">
+                        <img src="img/default-item.png" alt="신성한 창">
+                    </div>
+                    <div class="item-info">
+                        <h4>신성한 창</h4>
+                        <p class="item-price">95,000원</p>
+                    </div>
+                </div>
+                <div class="item">
+                    <div class="item-image">
+                        <img src="img/default-item.png" alt="마법의 지팡이">
+                    </div>
+                    <div class="item-info">
+                        <h4>마법의 지팡이</h4>
+                        <p class="item-price">75,000원</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 인기 거래 아이템 -->
+        <div class="content-box popular-trades">
+            <h3 class="content-title">인기 거래 아이템</h3>
+            <div class="trade-list">
+                <div class="trade-row">
+                    <span class="trade-item">드래곤 슬레이어</span>
+                    <span class="trade-price">120,000원</span>
+                </div>
+                <div class="trade-row">
+                    <span class="trade-item">미스릴 갑옷</span>
+                    <span class="trade-price">180,000원</span>
+                </div>
+                <div class="trade-row">
+                    <span class="trade-item">신성한 창</span>
+                    <span class="trade-price">95,000원</span>
+                </div>
+                <div class="trade-row">
+                    <span class="trade-item">마법의 지팡이</span>
+                    <span class="trade-price">75,000원</span>
+                </div>
+                <div class="trade-row">
+                    <span class="trade-item">그림자 단검</span>
+                    <span class="trade-price">130,000원</span>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 최근 게시글 -->
+        <div class="content-box recent-posts">
+            <h3 class="content-title">최근 게시글</h3>
+            <div class="post-list">
+                <div class="post-item">
+                    <div class="post-title">게임 아이템 거래소 이용 규칙 안내</div>
+                    <div class="post-meta">관리자 | 2025-06-10 | 조회수 1,245</div>
+                </div>
+                <div class="post-item">
+                    <div class="post-title">6월 업데이트 안내 및 점검 완료</div>
+                    <div class="post-meta">관리자 | 2025-06-08 | 조회수 982</div>
+                </div>
+                <div class="post-item">
+                    <div class="post-title">레전더리 무기 거래 어렵나요?</div>
+                    <div class="post-meta">김과123 | 2025-06-14 | 조회수 42</div>
+                </div>
+                <div class="post-item">
+                    <div class="post-title">아이템 강화 성공률 질문입니다</div>
+                    <div class="post-meta">마법사1999 | 2025-06-13 | 조회수 78</div>
+                </div>
+                <div class="post-item">
+                    <div class="post-title">신규 던전 공략 정보 공유합니다</div>
+                    <div class="post-meta">전사왕 | 2025-06-13 | 조회수 156</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script src="js/common.js"></script>
+</body>
+</html>

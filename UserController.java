@@ -22,7 +22,7 @@ public class UserController {
     
     @GetMapping("/register")
     public String registerForm() {
-        return "user/register";
+        return "register";
     }
     
     @PostMapping("/register")
@@ -42,44 +42,44 @@ public class UserController {
             // 입력값 검증
             if (username == null || username.trim().isEmpty()) {
                 model.addAttribute("error", "아이디를 입력해주세요.");
-                return "user/register";
+                return "register";
             }
             
             if (password == null || password.length() < 8) {
                 model.addAttribute("error", "비밀번호는 8자 이상이어야 합니다.");
-                return "user/register";
+                return "register";
             }
             
             if (!password.equals(confirmPassword)) {
                 model.addAttribute("error", "비밀번호가 일치하지 않습니다.");
-                return "user/register";
+                return "register";
             }
             
             if (nickname == null || nickname.trim().isEmpty()) {
                 model.addAttribute("error", "닉네임을 입력해주세요.");
-                return "user/register";
+                return "register";
             }
             
             if (email == null || email.trim().isEmpty()) {
                 model.addAttribute("error", "이메일을 입력해주세요.");
-                return "user/register";
+                return "register";
             }
             
             // 필수 약관 동의 확인
             if (agreeTerms == null || agreePrivacy == null) {
                 model.addAttribute("error", "필수 약관에 동의해주세요.");
-                return "user/register";
+                return "register";
             }
             
             // 중복 검사
             if (userRepository.existsByUsername(username.trim())) {
                 model.addAttribute("error", "이미 사용 중인 아이디입니다.");
-                return "user/register";
+                return "register";
             }
             
             if (userRepository.existsByEmail(email.trim())) {
                 model.addAttribute("error", "이미 사용 중인 이메일입니다.");
-                return "user/register";
+                return "register";
             }
             
             // 사용자 생성
@@ -88,7 +88,7 @@ public class UserController {
             user.setPassword(passwordEncoder.encode(password));
             user.setNickname(nickname.trim());
             user.setEmail(email.trim());
-            user.setRole(User.Role.USER);
+            user.setRole(User.UserRole.USER);
             user.setEnabled(true);
             
             userRepository.save(user);
@@ -98,7 +98,7 @@ public class UserController {
             
         } catch (Exception e) {
             model.addAttribute("error", "회원가입 중 오류가 발생했습니다: " + e.getMessage());
-            return "user/register";
+            return "register";
         }
     }
 }

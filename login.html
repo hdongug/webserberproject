@@ -1,12 +1,13 @@
 <!DOCTYPE html>
-<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<html lang="ko">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>로그인 - 게임 아이템 거래소</title>
     
     <!-- CSS -->
-    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <link rel="stylesheet" href="css/common.css">
+    <link rel="stylesheet" href="css/auth.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -15,100 +16,119 @@
 <body>
     <!-- 헤더 -->
     <header class="header">
-        <nav class="navbar">
-            <a th:href="@{/}" class="logo">
-                <i class="fas fa-gamepad"></i>
-                게임 아이템 거래소
-            </a>
-            
-            <button class="menu-toggle" id="menuToggle">
-                <i class="fas fa-bars"></i>
-            </button>
-        </nav>
+        <a href="index.html" class="site-title">게임 아이템 거래소</a>
+        <button class="menu-btn" onclick="toggleMenu()">☰</button>
     </header>
-
-    <!-- 사이드바 -->
-    <div class="sidebar" id="sidebar">
-        <div class="sidebar-header">
-            <h3>메뉴</h3>
-            <button class="sidebar-close" id="sidebarClose">
-                <i class="fas fa-times"></i>
-            </button>
-        </div>
-        <ul class="sidebar-menu">
-            <li><a th:href="@{/}"><i class="fas fa-home"></i> 홈</a></li>
-            <li><a th:href="@{/items}"><i class="fas fa-store"></i> 거래소</a></li>
-            <li><a th:href="@{/board}"><i class="fas fa-clipboard-list"></i> 게시판</a></li>
-            <li><a th:href="@{/attendance}"><i class="fas fa-calendar-check"></i> 출석체크</a></li>
-            <li><a th:href="@{/login}"><i class="fas fa-sign-in-alt"></i> 로그인</a></li>
-            <li><a th:href="@{/register}"><i class="fas fa-user-plus"></i> 회원가입</a></li>
-        </ul>
+    
+    <!-- 사이드 메뉴 -->
+    <div class="side-menu">
+        <button class="side-menu-close" onclick="closeMenu()">×</button>
+        <a href="index.html" class="menu-item">홈</a>
+        <a href="attendance.html" class="menu-item">출석체크</a>
+        <a href="profile.html" class="menu-item">프로필</a>
+        <a href="community_board.html" class="menu-item">게시판</a>
+        <a href="login.html" class="menu-item">로그인</a>
+        <a href="register.html" class="menu-item">회원가입</a>
     </div>
-
-    <!-- 오버레이 -->
-    <div class="overlay" id="overlay"></div>
 
     <!-- 로그인 컨테이너 -->
     <div class="login-container">
-        <div class="login-card">
-            <h1 class="login-title">로그인</h1>
-            
+        <div class="login-form">
             <!-- 에러 메시지 -->
-            <div th:if="${error}" class="alert alert-error">
+            <div id="errorMessage" class="alert alert-error" style="display: none;">
                 <i class="fas fa-exclamation-circle"></i>
-                <span th:text="${error}">에러 메시지</span>
+                <span>에러 메시지</span>
             </div>
             
             <!-- 성공 메시지 -->
-            <div th:if="${message}" class="alert alert-success">
+            <div id="successMessage" class="alert alert-success" style="display: none;">
                 <i class="fas fa-check-circle"></i>
-                <span th:text="${message}">성공 메시지</span>
+                <span>성공 메시지</span>
             </div>
             
-            <form th:action="@{/login}" method="post" id="loginForm">
+            <form action="#" method="post" id="loginForm">
                 <div class="form-group">
-                    <label for="username" class="form-label">아이디</label>
                     <input type="text" 
                            id="username" 
                            name="username" 
-                           class="form-input" 
-                           placeholder="아이디를 입력하세요"
-                           required>
+                           placeholder="아이디 또는 전화번호" 
+                           required 
+                           class="form-control" />
                 </div>
                 
                 <div class="form-group">
-                    <label for="password" class="form-label">비밀번호</label>
                     <input type="password" 
                            id="password" 
                            name="password" 
-                           class="form-input" 
-                           placeholder="비밀번호를 입력하세요"
-                           required>
+                           placeholder="비밀번호" 
+                           required 
+                           class="form-control" />
                 </div>
                 
-                <div class="form-checkbox">
-                    <input type="checkbox" id="remember" name="remember-me">
-                    <label for="remember">아이디 저장</label>
+                <div class="form-check">
+                    <input type="checkbox" id="rememberMe" name="rememberMe" class="form-check-input">
+                    <label for="rememberMe" class="form-check-label">로그인 상태 유지</label>
                 </div>
                 
-                <div class="form-links">
-                    <a href="#" onclick="alert('준비중입니다.')">아이디 찾기</a> / 
-                    <a href="#" onclick="alert('준비중입니다.')">비밀번호 찾기</a>
-                </div>
-                
-                <button type="submit" class="btn-primary" data-original-text="로그인">
-                    로그인
-                </button>
-                
-                <div class="register-link">
-                    아직 계정이 없으신가요? <a th:href="@{/register}">회원가입</a>
+                <div class="form-button">
+                    <button type="submit" class="btn btn-login">로그인</button>
                 </div>
             </form>
+            
+            <div class="login-links">
+                <a href="find_password.html" class="login-link">비밀번호 찾기</a>
+                <a href="find_id.html" class="login-link">아이디 찾기</a>
+                <a href="register.html" class="login-link">회원가입</a>
+            </div>
         </div>
     </div>
 
     <!-- JavaScript -->
-    <script th:src="@{/js/main.js}"></script>
+    <script src="js/common.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // 로그인 폼 제출 처리
+            const loginForm = document.getElementById('loginForm');
+            if (loginForm) {
+                loginForm.addEventListener('submit', function(e) {
+                    e.preventDefault();
+                    
+                    const username = document.getElementById('username').value;
+                    const password = document.getElementById('password').value;
+                    
+                    // 임시로 로컬스토리지에서 사용자 정보 확인 (실제로는 서버에서 처리)
+                    const users = JSON.parse(localStorage.getItem('users')) || [];
+                    const user = users.find(u => u.username === username && u.password === password);
+                    
+                    if (user) {
+                        // 로그인 성공
+                        const successMessage = document.getElementById('successMessage');
+                        successMessage.style.display = 'block';
+                        successMessage.querySelector('span').textContent = '로그인에 성공했습니다!';
+                        
+                        // 로그인 상태 저장
+                        localStorage.setItem('isLoggedIn', 'true');
+                        localStorage.setItem('userNickname', user.nickname || user.username);
+                        localStorage.setItem('currentUser', JSON.stringify({
+                            username: user.username,
+                            nickname: user.nickname,
+                            gender: user.gender
+                        }));
+                        
+                        // 3초 후 홈으로 이동
+                        setTimeout(() => {
+                            window.location.href = 'index.html';
+                        }, 3000);
+                    } else {
+                        // 로그인 실패
+                        const errorMessage = document.getElementById('errorMessage');
+                        errorMessage.style.display = 'block';
+                        errorMessage.querySelector('span').textContent = '아이디 또는 비밀번호가 일치하지 않습니다.';
+                    }
+                });
+            }
+        });
+    </script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/js/all.min.js"></script>
 </body>
 </html>

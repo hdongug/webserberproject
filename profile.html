@@ -1,0 +1,564 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>게임 아이템 거래소 - 프로필</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        .profile-container {
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .profile-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        .profile-avatar {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            background-color: #4CAF50;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.5rem;
+            margin-right: 20px;
+        }
+        
+        .profile-info {
+            flex: 1;
+        }
+        
+        .profile-name {
+            font-size: 1.8rem;
+            font-weight: 700;
+            margin: 0 0 5px 0;
+        }
+        
+        .profile-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .stat-card {
+            background-color: #f5f5f5;
+            border-radius: 6px;
+            padding: 15px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        
+        .stat-title {
+            color: #666;
+            font-size: 0.9rem;
+            margin-bottom: 5px;
+        }
+        
+        .stat-value {
+            font-size: 1.4rem;
+            font-weight: 600;
+        }
+        
+        .tabs {
+            display: flex;
+            border-bottom: 1px solid #ddd;
+            margin-bottom: 20px;
+        }
+        
+        .tab {
+            padding: 10px 20px;
+            cursor: pointer;
+            border-bottom: 3px solid transparent;
+            font-weight: 500;
+            transition: all 0.3s;
+        }
+        
+        .tab:hover {
+            color: #4CAF50;
+        }
+        
+        .tab.active {
+            border-bottom-color: #4CAF50;
+            color: #4CAF50;
+        }
+        
+        .tab-content {
+            display: none;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        .friend-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 15px;
+        }
+        
+        .friend-card {
+            display: flex;
+            align-items: center;
+            background-color: #f9f9f9;
+            border-radius: 8px;
+            padding: 10px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        
+        .friend-avatar {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background-color: #2196F3;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            margin-right: 10px;
+        }
+        
+        .friend-name {
+            flex: 1;
+            font-weight: 500;
+        }
+        
+        .friend-actions {
+            display: flex;
+            gap: 5px;
+        }
+        
+        .btn-sm {
+            padding: 5px 10px;
+            border-radius: 4px;
+            border: none;
+            cursor: pointer;
+            font-size: 0.8rem;
+            transition: background-color 0.3s;
+        }
+        
+        .btn-accept {
+            background-color: #4CAF50;
+            color: white;
+        }
+        
+        .btn-decline {
+            background-color: #F44336;
+            color: white;
+        }
+        
+        .btn-add {
+            background-color: #2196F3;
+            color: white;
+        }
+        
+        .btn-accept:hover {
+            background-color: #3e8e41;
+        }
+        
+        .btn-decline:hover {
+            background-color: #d32f2f;
+        }
+        
+        .btn-add:hover {
+            background-color: #1976d2;
+        }
+        
+        #friendSearch {
+            margin-bottom: 15px;
+            padding: 10px;
+            border-radius: 4px;
+            border: 1px solid #ddd;
+            width: 100%;
+        }
+        
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background-color: #4CAF50;
+            color: white;
+            padding: 15px;
+            border-radius: 4px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+            z-index: 1000;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <nav class="navbar">
+            <a href="index.html" class="logo">
+                <i class="fas fa-gamepad"></i>
+                게임 아이템 거래소
+            </a>
+            
+            <button class="menu-toggle" id="menuToggle">
+                <i class="fas fa-bars"></i>
+            </button>
+        </nav>
+    </header>
+
+    <!-- 사이드바 -->
+    <div class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <h3>메뉴</h3>
+            <button class="sidebar-close" id="sidebarClose">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <ul class="sidebar-menu">
+            <li><a href="index.html"><i class="fas fa-home"></i> 홈</a></li>
+            <li><a href="market.html"><i class="fas fa-store"></i> 거래소</a></li>
+            <li><a href="board.html"><i class="fas fa-clipboard-list"></i> 게시판</a></li>
+            <li><a href="attendance.html"><i class="fas fa-calendar-check"></i> 출석체크</a></li>
+            <li><a href="storage.html"><i class="fas fa-warehouse"></i> 창고</a></li>
+            <li><a href="profile.html"><i class="fas fa-user"></i> 프로필</a></li>
+            <li><a href="login.html"><i class="fas fa-sign-in-alt"></i> 로그인</a></li>
+        </ul>
+    </div>
+
+    <!-- 오버레이 -->
+    <div class="overlay" id="overlay"></div>
+
+    <div class="container">
+        <div class="profile-container">
+            <div class="profile-header">
+                <div class="profile-avatar">사</div>
+                <div class="profile-info">
+                    <h1 class="profile-name">사용자123</h1>
+                    <p>가입일: 2024년 5월 15일</p>
+                </div>
+            </div>
+            
+            <div class="profile-stats">
+                <div class="stat-card">
+                    <div class="stat-title">재화</div>
+                    <div class="stat-value">150,000 원</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-title">창고 아이템</div>
+                    <div class="stat-value">24 개</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-title">거래 횟수</div>
+                    <div class="stat-value">42 회</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-title">친구</div>
+                    <div class="stat-value">7 명</div>
+                </div>
+            </div>
+            
+            <div class="tabs">
+                <div class="tab active" data-tab="friends">친구 목록</div>
+                <div class="tab" data-tab="requests">친구 요청</div>
+                <div class="tab" data-tab="pending">대기 중인 친구</div>
+                <div class="tab" data-tab="add">친구 추가</div>
+            </div>
+            
+            <div class="tab-content active" id="friends">
+                <div class="friend-list">
+                    <div class="friend-card">
+                        <div class="friend-avatar">김</div>
+                        <div class="friend-name">김철수</div>
+                    </div>
+                    <div class="friend-card">
+                        <div class="friend-avatar">이</div>
+                        <div class="friend-name">이영희</div>
+                    </div>
+                    <div class="friend-card">
+                        <div class="friend-avatar">박</div>
+                        <div class="friend-name">박지성</div>
+                    </div>
+                    <div class="friend-card">
+                        <div class="friend-avatar">최</div>
+                        <div class="friend-name">최동욱</div>
+                    </div>
+                    <div class="friend-card">
+                        <div class="friend-avatar">정</div>
+                        <div class="friend-name">정민수</div>
+                    </div>
+                    <div class="friend-card">
+                        <div class="friend-avatar">강</div>
+                        <div class="friend-name">강지원</div>
+                    </div>
+                    <div class="friend-card">
+                        <div class="friend-avatar">홍</div>
+                        <div class="friend-name">홍길동</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="tab-content" id="requests">
+                <div class="friend-list">
+                    <div class="friend-card">
+                        <div class="friend-avatar">송</div>
+                        <div class="friend-name">송민호</div>
+                        <div class="friend-actions">
+                            <button class="btn-sm btn-accept">수락</button>
+                            <button class="btn-sm btn-decline">거절</button>
+                        </div>
+                    </div>
+                    <div class="friend-card">
+                        <div class="friend-avatar">한</div>
+                        <div class="friend-name">한소희</div>
+                        <div class="friend-actions">
+                            <button class="btn-sm btn-accept">수락</button>
+                            <button class="btn-sm btn-decline">거절</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="tab-content" id="pending">
+                <div class="friend-list">
+                    <div class="friend-card">
+                        <div class="friend-avatar">윤</div>
+                        <div class="friend-name">윤석열</div>
+                        <div class="friend-status">대기 중</div>
+                    </div>
+                    <div class="friend-card">
+                        <div class="friend-avatar">문</div>
+                        <div class="friend-name">문재인</div>
+                        <div class="friend-status">대기 중</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="tab-content" id="add">
+                <input type="text" id="friendSearch" placeholder="친구 이름 검색...">
+                <div class="friend-list">
+                    <div class="friend-card">
+                        <div class="friend-avatar">오</div>
+                        <div class="friend-name">오세훈</div>
+                        <div class="friend-actions">
+                            <button class="btn-sm btn-add">친구 추가</button>
+                        </div>
+                    </div>
+                    <div class="friend-card">
+                        <div class="friend-avatar">안</div>
+                        <div class="friend-name">안철수</div>
+                        <div class="friend-actions">
+                            <button class="btn-sm btn-add">친구 추가</button>
+                        </div>
+                    </div>
+                    <div class="friend-card">
+                        <div class="friend-avatar">유</div>
+                        <div class="friend-name">유재석</div>
+                        <div class="friend-actions">
+                            <button class="btn-sm btn-add">친구 추가</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="notification" id="notification"></div>
+
+    <script src="main.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // 로그인 상태 확인
+            const currentUser = localStorage.getItem('currentUser');
+            if (!currentUser) {
+                // 로그인하지 않은 상태면 로그인 페이지로 리다이렉트
+                alert('프로필 페이지는 로그인 후 이용하실 수 있습니다.');
+                window.location.href = 'login.html';
+                return;
+            }
+            
+            // 현재 로그인한 사용자 정보 가져오기
+            const userData = JSON.parse(currentUser);
+            document.querySelector('.profile-name').textContent = userData.nickname || userData.username;
+            document.querySelector('.profile-avatar').textContent = (userData.nickname || userData.username).charAt(0);
+            // 탭 전환 기능
+            const tabs = document.querySelectorAll('.tab');
+            const tabContents = document.querySelectorAll('.tab-content');
+            
+            tabs.forEach(tab => {
+                tab.addEventListener('click', () => {
+                    const tabId = tab.getAttribute('data-tab');
+                    
+                    // 모든 탭과 컨텐츠에서 active 클래스 제거
+                    tabs.forEach(t => t.classList.remove('active'));
+                    tabContents.forEach(c => c.classList.remove('active'));
+                    
+                    // 클릭된 탭과 관련 컨텐츠에 active 클래스 추가
+                    tab.classList.add('active');
+                    document.getElementById(tabId).classList.add('active');
+                });
+            });
+            
+            // 친구 요청 수락/거절 기능
+            const acceptButtons = document.querySelectorAll('.btn-accept');
+            const declineButtons = document.querySelectorAll('.btn-decline');
+            const addButtons = document.querySelectorAll('.btn-add');
+            
+            acceptButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    const friendCard = this.closest('.friend-card');
+                    const friendName = friendCard.querySelector('.friend-name').textContent;
+                    showNotification(`${friendName}님의 친구 요청을 수락했습니다.`);
+                    
+                    // 친구 목록으로 이동
+                    const friendsList = document.getElementById('friends').querySelector('.friend-list');
+                    const newFriendCard = document.createElement('div');
+                    newFriendCard.className = 'friend-card';
+                    newFriendCard.innerHTML = `
+                        <div class="friend-avatar">${friendName.charAt(0)}</div>
+                        <div class="friend-name">${friendName}</div>
+                    `;
+                    friendsList.appendChild(newFriendCard);
+                    
+                    // 요청 목록에서 제거
+                    friendCard.remove();
+                    
+                    // 친구 수 업데이트
+                    updateFriendCount(1);
+                });
+            });
+            
+            declineButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    const friendCard = this.closest('.friend-card');
+                    const friendName = friendCard.querySelector('.friend-name').textContent;
+                    showNotification(`${friendName}님의 친구 요청을 거절했습니다.`);
+                    
+                    // 요청 목록에서 제거
+                    friendCard.remove();
+                });
+            });
+            
+            addButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    const friendCard = this.closest('.friend-card');
+                    const friendName = friendCard.querySelector('.friend-name').textContent;
+                    showNotification(`${friendName}님에게 친구 요청을 보냈습니다.`);
+                    
+                    // 친구 추가 버튼 비활성화 및 텍스트 변경
+                    this.disabled = true;
+                    this.textContent = '요청됨';
+                    this.classList.remove('btn-add');
+                    this.classList.add('btn-add-disabled');
+                    
+                    // 대기 중인 친구 목록에 추가
+                    const pendingList = document.getElementById('pending').querySelector('.friend-list');
+                    const newPendingCard = document.createElement('div');
+                    newPendingCard.className = 'friend-card';
+                    newPendingCard.innerHTML = `
+                        <div class="friend-avatar">${friendName.charAt(0)}</div>
+                        <div class="friend-name">${friendName}</div>
+                        <div class="friend-status">대기 중</div>
+                    `;
+                    pendingList.appendChild(newPendingCard);
+                });
+            });
+            
+            // 친구 검색 기능
+            const friendSearch = document.getElementById('friendSearch');
+            friendSearch.addEventListener('input', function() {
+                const searchValue = this.value.toLowerCase();
+                const friendCards = document.querySelectorAll('#add .friend-card');
+                
+                friendCards.forEach(card => {
+                    const name = card.querySelector('.friend-name').textContent.toLowerCase();
+                    if (name.includes(searchValue)) {
+                        card.style.display = 'flex';
+                    } else {
+                        card.style.display = 'none';
+                    }
+                });
+            });
+            
+            // 알림 표시 함수
+            function showNotification(message) {
+                const notification = document.getElementById('notification');
+                notification.textContent = message;
+                notification.style.display = 'block';
+                
+                setTimeout(() => {
+                    notification.style.display = 'none';
+                }, 3000);
+            }
+            
+            // 친구 수 업데이트 함수
+            function updateFriendCount(change) {
+                const friendCountElement = document.querySelector('.stat-card:nth-child(4) .stat-value');
+                let currentCount = parseInt(friendCountElement.textContent);
+                currentCount += change;
+                friendCountElement.textContent = `${currentCount} 명`;
+            }
+            
+            // 실시간 친구 요청 시뮬레이션 (5초 후에 새 친구 요청 도착)
+            setTimeout(() => {
+                const requestsList = document.getElementById('requests').querySelector('.friend-list');
+                const newRequestCard = document.createElement('div');
+                newRequestCard.className = 'friend-card';
+                newRequestCard.innerHTML = `
+                    <div class="friend-avatar">임</div>
+                    <div class="friend-name">임지민</div>
+                    <div class="friend-actions">
+                        <button class="btn-sm btn-accept">수락</button>
+                        <button class="btn-sm btn-decline">거절</button>
+                    </div>
+                `;
+                requestsList.appendChild(newRequestCard);
+                
+                // 새 친구 요청에 대한 이벤트 리스너 추가
+                const newAcceptButton = newRequestCard.querySelector('.btn-accept');
+                const newDeclineButton = newRequestCard.querySelector('.btn-decline');
+                
+                newAcceptButton.addEventListener('click', function() {
+                    const friendCard = this.closest('.friend-card');
+                    const friendName = friendCard.querySelector('.friend-name').textContent;
+                    showNotification(`${friendName}님의 친구 요청을 수락했습니다.`);
+                    
+                    // 친구 목록으로 이동
+                    const friendsList = document.getElementById('friends').querySelector('.friend-list');
+                    const newFriendCard = document.createElement('div');
+                    newFriendCard.className = 'friend-card';
+                    newFriendCard.innerHTML = `
+                        <div class="friend-avatar">${friendName.charAt(0)}</div>
+                        <div class="friend-name">${friendName}</div>
+                    `;
+                    friendsList.appendChild(newFriendCard);
+                    
+                    // 요청 목록에서 제거
+                    friendCard.remove();
+                    
+                    // 친구 수 업데이트
+                    updateFriendCount(1);
+                });
+                
+                newDeclineButton.addEventListener('click', function() {
+                    const friendCard = this.closest('.friend-card');
+                    const friendName = friendCard.querySelector('.friend-name').textContent;
+                    showNotification(`${friendName}님의 친구 요청을 거절했습니다.`);
+                    
+                    // 요청 목록에서 제거
+                    friendCard.remove();
+                });
+                
+                // 알림 표시
+                showNotification('새로운 친구 요청이 도착했습니다.');
+            }, 5000);
+        });
+    </script>
+</body>
+</html>

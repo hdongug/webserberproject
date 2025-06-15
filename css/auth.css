@@ -1,0 +1,237 @@
+/* 인증 페이지 (로그인/회원가입) 스타일 */
+
+/* 새로운 헤더 스타일 - 보라색 */
+.header {
+    background-color: #4b2e83; /* 진한 보라색 */
+    color: white;
+    padding: 15px 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+.site-title {
+    font-size: 20px;
+    font-weight: bold;
+    color: white;
+    text-decoration: none;
+}
+
+.menu-btn {
+    background: none;
+    border: none;
+    color: white;
+    font-size: 24px;
+    cursor: pointer;
+}
+
+/* 공통 스타일 */
+.login-container {
+    max-width: 450px;
+    margin: 80px auto;
+    padding: 0 20px;
+}
+
+.register-container {
+    max-width: 600px;
+    margin: 50px auto;
+    padding: 0 20px;
+}
+
+.login-form,
+.register-form {
+    background-color: #fff;
+    border-radius: 8px;
+    padding: 30px 20px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+/* 폼 그룹 스타일 */
+.form-group {
+    margin-bottom: 20px;
+}
+
+.form-row {
+    display: flex;
+    align-items: center;
+}
+
+.form-label {
+    width: 120px;
+    font-size: 15px;
+    text-align: right;
+    padding-right: 15px;
+    font-weight: 500;
+    color: #333;
+}
+
+.form-input-wrap {
+    flex: 1;
+}
+
+.form-control {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #e1e1e1;
+    border-radius: 4px;
+    font-size: 15px;
+    transition: border-color 0.3s;
+    box-sizing: border-box;
+}
+
+.form-control:focus {
+    border-color: #007bff;
+    outline: none;
+}
+
+.form-check {
+    display: flex;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.form-check-input {
+    margin-right: 8px;
+    width: 18px;
+    height: 18px;
+}
+
+.form-check-label {
+    font-size: 14px;
+    color: #666;
+}
+
+/* 버튼 스타일 */
+.btn {
+    width: 100%;
+    padding: 12px;
+    border: none;
+    border-radius: 4px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.btn-login {
+    background-color: #6b7280;
+    color: white;
+}
+
+.btn-register, .btn-primary {
+    background-color: #4b2e83; /* 보라색으로 변경 */
+    color: white;
+}
+
+.btn-login:hover {
+    background-color: #4b5563;
+}
+
+.btn-register:hover {
+    background-color: #3a2366;
+}
+
+/* 로그인 하단 링크 */
+.login-links {
+    margin-top: 20px;
+    text-align: center;
+    font-size: 14px;
+}
+
+.login-links a {
+    color: #666;
+    text-decoration: none;
+}
+
+.login-links a:hover {
+    text-decoration: underline;
+}
+
+.separator {
+    margin: 0 8px;
+    color: #ccc;
+}
+
+/* 회원가입 탭 링크 */
+.auth-tabs {
+    display: flex;
+    margin-bottom: 20px;
+    border-bottom: 1px solid #e1e1e1;
+}
+
+.tab-link {
+    flex: 1;
+    padding: 12px 0;
+    text-align: center;
+    color: #666;
+    text-decoration: none;
+    font-size: 14px;
+}
+
+.tab-link.active {
+    color: #000;
+    font-weight: 600;
+    border-bottom: 2px solid #000;
+}
+
+/* 성별 선택 버튼 스타일 */
+.gender-options {
+    display: flex;
+    gap: 15px;
+    flex: 1;
+}
+
+.gender-option {
+    flex: 0 0 80px;
+    border: 1px solid #e1e1e1;
+    border-radius: 4px;
+    padding: 8px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+}
+
+.gender-option:hover {
+    border-color: #4b2e83;
+}
+
+.gender-option input[type="radio"] {
+    margin-right: 8px;
+    width: 16px;
+    height: 16px;
+    accent-color: #4b2e83;
+}
+
+.gender-text {
+    font-size: 15px;
+    color: #333;
+}
+
+/* 페이지 제목 스타일 */
+.register-title, .auth-title {
+    text-align: center;
+    margin-bottom: 25px;
+    font-size: 22px;
+    color: #333;
+    font-weight: 600;
+}
+
+/* 알림 메시지 스타일 */
+.alert {
+    padding: 12px;
+    margin-bottom: 20px;
+    border-radius: 4px;
+}
+
+.alert-error {
+    background-color: #fee2e2;
+    color: #dc2626;
+}
+
+.alert-success {
+    background-color: #d1fae5;
+    color: #059669;
+}

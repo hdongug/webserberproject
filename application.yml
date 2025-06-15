@@ -30,7 +30,7 @@ spring:
   # SQL 초기화 설정
   sql:
     init:
-      mode: never
+      mode: always
   
   # Thymeleaf 설정
   thymeleaf:

@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>게시글 보기 - 게임 아이템 거래소</title>
+    <link rel="stylesheet" href="css/common.css">
+    <style>
+        .container {
+            width: 100%;
+            max-width: 1200px;
+            margin: 80px auto 0;
+            padding: 20px;
+        }
+        
+        .post-container {
+            background: #fff;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            padding: 20px;
+        }
+        
+        .post-header {
+            display: flex;
+            justify-content: space-between;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .post-title {
+            font-size: 24px;
+            color: #333;
+            margin-bottom: 10px;
+        }
+        
+        .post-info {
+            color: #666;
+            font-size: 14px;
+            display: flex;
+            gap: 15px;
+        }
+        
+        .post-category {
+            background-color: #4527a0;
+            color: white;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            margin-right: 10px;
+        }
+        
+        .post-content {
+            line-height: 1.6;
+            margin-bottom: 30px;
+        }
+        
+        .post-buttons {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 20px;
+            border-top: 1px solid #eee;
+            padding-top: 15px;
+        }
+        
+        .comment-section {
+            margin-top: 30px;
+        }
+        
+        .comment-form {
+            margin-bottom: 20px;
+        }
+        
+        .comment-form textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            resize: none;
+            height: 80px;
+            margin-bottom: 10px;
+        }
+        
+        .comment-list {
+            border-top: 1px solid #eee;
+            padding-top: 20px;
+        }
+        
+        .comment {
+            padding: 15px;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .comment-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+        }
+        
+        .comment-author {
+            font-weight: bold;
+        }
+        
+        .comment-date {
+            color: #888;
+            font-size: 12px;
+        }
+        
+        .comment-content {
+            margin-bottom: 5px;
+        }
+    </style>
+</head>
+<body>
+    <!-- 헤더 -->
+    <header class="header">
+        <a href="index.html" class="site-title">게임 아이템 거래소</a>
+        <button class="menu-btn" onclick="toggleMenu()">☰</button>
+    </header>
+
+    <!-- 사이드 메뉴 -->
+    <div class="side-menu">
+        <button class="side-menu-close" onclick="closeMenu()">×</button>
+        <a href="index.html" class="menu-item">홈</a>
+        <a href="attendance.html" class="menu-item">출석체크</a>
+        <a href="profile.html" class="menu-item">프로필</a>
+        <a href="community_board.html" class="menu-item">게시판</a>
+        <a href="login.html" class="menu-item">로그인</a>
+        <a href="register.html" class="menu-item">회원가입</a>
+    </div>
+    
+    <div class="container">
+        <!-- 게시글 상세 내용 -->
+        <div class="post-container">
+            <div id="post-content">
+                <!-- 내용은 JavaScript에서 동적으로 추가됩니다 -->
+                <div class="loading">게시글을 불러오는 중...</div>
+            </div>
+            
+            <div class="post-buttons">
+                <div>
+                    <a href="community_board.html" class="btn">목록으로</a>
+                </div>
+                <div id="author-buttons" style="display: none;">
+                    <button onclick="editPost()" class="btn">수정</button>
+                    <button onclick="deletePost()" class="btn btn-danger">삭제</button>
+                </div>
+            </div>
+            
+            <!-- 댓글 섹션 -->
+            <div class="comment-section">
+                <h3>댓글</h3>
+                <div class="comment-form">
+                    <textarea id="comment-input" placeholder="댓글을 입력하세요"></textarea>
+                    <button onclick="addComment()" class="btn">댓글 작성</button>
+                </div>
+                <div class="comment-list" id="comment-list">
+                    <!-- 댓글은 JavaScript에서 동적으로 추가됩니다 -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/common.js"></script>
+    <script>
+        // URL에서 게시글 ID 가져오기
+        const urlParams = new URLSearchParams(window.location.search);
+        const postId = urlParams.get('id');
+        
+        // 페이지 로드 시 게시글 불러오기
+        document.addEventListener('DOMContentLoaded', function() {
+            // 실제로는 서버에서 데이터를 가져와야 함
+            // 여기서는 예시 데이터를 사용
+            loadPost(postId);
+        });
+        
+        function loadPost(id) {
+            // 실제로는 서버에서 데이터를 가져와야 함
+            // 로컬 스토리지에서 게시글 가져오기 (테스트용)
+            const posts = JSON.parse(localStorage.getItem('posts') || '[]');
+            const post = posts.find(p => p.id == id);
+            
+            if (post) {
+                // 게시글이 존재하면 내용 표시
+                renderPost(post);
+                renderComments(post.comments || []);
+                
+                // 조회수 증가 및 저장
+                post.views = (post.views || 0) + 1;
+                localStorage.setItem('posts', JSON.stringify(posts));
+                
+                // 작성자인 경우 수정/삭제 버튼 표시
+                const currentUser = localStorage.getItem('userNickname');
+                if (currentUser && currentUser === post.author) {
+                    document.getElementById('author-buttons').style.display = 'block';
+                }
+            } else {
+                // 게시글이 없으면 에러 메시지
+                const postContent = document.getElementById('post-content');
+                postContent.innerHTML = '<div class="error">게시글을 찾을 수 없습니다.</div>';
+            }
+        }
+        
+        function renderPost(post) {
+            const postContent = document.getElementById('post-content');
+            
+            // 게시글 HTML 생성
+            const html = `
+                <div class="post-header">
+                    <div>
+                        <h2 class="post-title">
+                            <span class="post-category">${getCategoryName(post.category)}</span>
+                            ${post.title}
+                        </h2>
+                        <div class="post-info">
+                            <span>작성자: ${post.author}</span>
+                            <span>작성일: ${post.date}</span>
+                            <span>조회수: ${post.views || 0}</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="post-content">
+                    ${post.content.replace(/\n/g, '<br>')}
+                </div>
+            `;
+            
+            postContent.innerHTML = html;
+            
+            // 페이지 제목 업데이트
+            document.title = `${post.title} - 게임 아이템 거래소`;
+        }
+        
+        function renderComments(comments) {
+            const commentList = document.getElementById('comment-list');
+            if (!comments || comments.length === 0) {
+                commentList.innerHTML = '<p>첫 댓글을 작성해보세요!</p>';
+                return;
+            }
+            
+            let html = '';
+            comments.forEach(comment => {
+                html += `
+                    <div class="comment">
+                        <div class="comment-header">
+                            <span class="comment-author">${comment.author}</span>
+                            <span class="comment-date">${comment.date}</span>
+                        </div>
+                        <div class="comment-content">${comment.content.replace(/\n/g, '<br>')}</div>
+                    </div>
+                `;
+            });
+            
+            commentList.innerHTML = html;
+        }
+        
+        function addComment() {
+            const commentInput = document.getElementById('comment-input');
+            const content = commentInput.value.trim();
+            
+            if (!content) {
+                alert('댓글 내용을 입력하세요.');
+                return;
+            }
+            
+            // 로그인 확인
+            const currentUser = localStorage.getItem('userNickname');
+            if (!currentUser) {
+                alert('댓글을 작성하려면 로그인이 필요합니다.');
+                location.href = 'login.html';
+                return;
+            }
+            
+            // 댓글 객체 생성
+            const newComment = {
+                author: currentUser,
+                content,
+                date: new Date().toISOString().split('T')[0]
+            };
+            
+            // 로컬 스토리지에서 게시글 가져오기
+            const posts = JSON.parse(localStorage.getItem('posts') || '[]');
+            const postIndex = posts.findIndex(p => p.id == postId);
+            
+            if (postIndex !== -1) {
+                // 게시글에 댓글 추가
+                posts[postIndex].comments = posts[postIndex].comments || [];
+                posts[postIndex].comments.push(newComment);
+                
+                // 저장
+                localStorage.setItem('posts', JSON.stringify(posts));
+                
+                // 댓글 목록 다시 렌더링
+                renderComments(posts[postIndex].comments);
+                
+                // 입력 필드 비우기
+                commentInput.value = '';
+            }
+        }
+        
+        function editPost() {
+            location.href = `post_edit.html?id=${postId}`;
+        }
+        
+        function deletePost() {
+            if (confirm('게시글을 삭제하시겠습니까?')) {
+                // 로컬 스토리지에서 게시글 삭제
+                const posts = JSON.parse(localStorage.getItem('posts') || '[]');
+                const newPosts = posts.filter(p => p.id != postId);
+                localStorage.setItem('posts', JSON.stringify(newPosts));
+                
+                alert('게시글이 삭제되었습니다.');
+                location.href = 'community_board.html';
+            }
+        }
+        
+        function getCategoryName(category) {
+            const categories = {
+                'free': '자유',
+                'info': '정보',
+                'trade': '거래',
+                'qna': '문의',
+                'notice': '공지'
+            };
+            
+            return categories[category] || '기타';
+        }
+    </script>
+</body>
+</html>
