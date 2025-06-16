@@ -272,7 +272,7 @@
                 </div>
             </div>
             
-            <div class="attendance-calendar">
+            <div class="attendance-calendar" id="calendar-days-container">
                 <!-- 요일 헤더 -->
                 <div class="calendar-day-name">일</div>
                 <div class="calendar-day-name">월</div>
@@ -283,7 +283,6 @@
                 <div class="calendar-day-name">토</div>
                 
                 <!-- 달력 날짜는 동적으로 생성됨 -->
-                <div id="calendar-days-container"></div>
             </div>
             
             <div class="attendance-info">
@@ -351,10 +350,9 @@
             console.log('출석체크 페이지 로드됨');
             
             // 로그인 상태 확인
-            const isLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
-            const currentUser = JSON.parse(localStorage.getItem('currentUser'));
+            const currentUser = localStorage.getItem('currentUser') ? JSON.parse(localStorage.getItem('currentUser')) : null;
             
-            if (!isLoggedIn || !currentUser) {
+            if (!currentUser) {
                 console.log('로그인 필요');
                 alert('출석체크는 로그인 후 이용할 수 있습니다.');
                 window.location.href = 'login.html';
@@ -363,6 +361,7 @@
             
             console.log('현재 사용자:', currentUser.username);
             const userId = currentUser.id;
+            
             // 현재 날짜 가져오기
             const today = new Date();
             const currentMonth = today.getMonth();
@@ -401,46 +400,32 @@
             }
             
             // 달력 생성
-            const calendarContainer = document.querySelector('.attendance-calendar');
-            createCalendar(currentYear, currentMonth, calendarContainer);
+            const calendarContainer = document.getElementById('calendar-days-container');
             
-            // 년도, 월 선택 이벤트 처리
+            // 연도와 월 선택 이벤트 설정
             yearSelect.addEventListener('change', updateCalendar);
             monthSelect.addEventListener('change', updateCalendar);
             
             // 달력 업데이트 함수
             function updateCalendar() {
-                // 요일 헤더를 제외한 모든 날짜 셀 제거
-                const dayElements = calendarContainer.querySelectorAll('.calendar-day:not(.calendar-day-name)');
-                dayElements.forEach(day => {
-                    if (day.parentNode === calendarContainer) {
-                        calendarContainer.removeChild(day);
-                    }
-                });
-                
-                // 새로 선택된 년도와 월로 달력 재생성
+                // 선택한 연도와 월 가져오기
                 const selectedYear = parseInt(yearSelect.value);
                 const selectedMonth = parseInt(monthSelect.value);
+                
+                // 달력 생성
                 createCalendar(selectedYear, selectedMonth, calendarContainer);
                 
-                // 출석체크 데이터 업데이트
+                // 통계 업데이트
                 updateAttendanceStats(selectedYear, selectedMonth);
             }
             
-            // 사용자별 출석체크 기록 가져오기 함수
+            // 사용자별 출석 기록 가져오기
             function getUserAttendance(userId) {
-                // 모든 사용자 출석데이터
                 const allAttendance = JSON.parse(localStorage.getItem('userAttendance')) || {};
-                
-                // 현재 사용자의 출석 기록
                 if (!allAttendance[userId]) {
-                    allAttendance[userId] = {
-                        history: [], // 출석일 기록
-                        streak: 0,   // 연속 출석일
-                        total: 0     // 총 출석일
-                    };
+                    allAttendance[userId] = { history: [], streak: 0, total: 0 };
+                    localStorage.setItem('userAttendance', JSON.stringify(allAttendance));
                 }
-                
                 return allAttendance[userId];
             }
             
@@ -506,17 +491,22 @@
                     return date.getFullYear() === year && date.getMonth() === month;
                 }).length;
                 
-                // 연속 출석일 계산
+                // 연속 출석일 계산 및 저장
                 const streak = calculateStreak(userAttendance.history);
+                userAttendance.streak = streak; // 연속 출석일 업데이트
                 
                 // 통계 화면 업데이트
                 const monthlyAttendance = document.querySelectorAll('.attendance-number')[0];
                 const streakElement = document.querySelectorAll('.attendance-number')[1];
                 const totalAttendance = document.querySelectorAll('.attendance-number')[2];
                 
+                // 통계 화면에 출석 기록 표시
                 monthlyAttendance.textContent = monthlyCount;
-                streakElement.textContent = userAttendance.streak;
+                streakElement.textContent = streak; // 실시간 계산된 연속 출석일 표시
                 totalAttendance.textContent = userAttendance.total;
+                
+                // 변경사항 저장
+                saveUserAttendance(userId, userAttendance);
             }
             
             // 현재 사용자의 출석체크 기록 가져오기
@@ -668,11 +658,13 @@
             }
             
         function createCalendar(year, month, container) {
-            // 날짜를 넣을 컨테이너 가져오기
-            const daysContainer = document.getElementById('calendar-days-container');
-            
-            // 이전 달력 날짜 삭제
-            daysContainer.innerHTML = '';
+            // 요일 헤더를 제외한 모든 날짜 셀 제거
+            const dayElements = container.querySelectorAll('.calendar-day:not(.calendar-day-name)');
+            dayElements.forEach(day => {
+                if (day.parentNode === container) {
+                    container.removeChild(day);
+                }
+            });
             
             // 월의 첫 날
             const firstDay = new Date(year, month, 1);
@@ -686,8 +678,11 @@
             for (let i = 0; i < firstDayIndex; i++) {
                 const emptyDay = document.createElement('div');
                 emptyDay.className = 'calendar-day empty';
-                daysContainer.appendChild(emptyDay);
+                container.appendChild(emptyDay);
             }
+            
+            // 사용자 출석 데이터 가져오기
+            const userAttendance = getUserAttendance(userId);
             
             // 날짜 추가
             const today = new Date();
@@ -716,7 +711,7 @@
                     dayElement.appendChild(checkIcon);
                 }
                 
-                daysContainer.appendChild(dayElement);
+                container.appendChild(dayElement);
             }
             
             // 현재 달 업데이트
