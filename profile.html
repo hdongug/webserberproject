@@ -373,6 +373,27 @@
 
     <script src="main.js"></script>
     <script>
+        // 사용자의 프로필 데이터를 가져오는 함수 (없으면 초기화)
+        function getUserProfileData(username) {
+            // localStorage에서 프로필 데이터 가져오기
+            const allProfiles = JSON.parse(localStorage.getItem('userProfiles')) || {};
+            
+            // 해당 유저의 프로필이 없으면 초기화
+            if (!allProfiles[username]) {
+                // 신규 회원의 경우 초기 프로필 데이터 생성
+                allProfiles[username] = {
+                    money: 0,         // 초기 재화
+                    items: 0,         // 초기 아이템 수
+                    trades: 0,        // 초기 거래 횟수
+                    friends: []       // 초기 친구 목록
+                };
+                
+                // 업데이트된 프로필 정보 저장
+                localStorage.setItem('userProfiles', JSON.stringify(allProfiles));
+            }
+            
+            return allProfiles[username];
+        }
         document.addEventListener('DOMContentLoaded', function() {
             // 로그인 상태 확인
             const currentUser = localStorage.getItem('currentUser');
@@ -383,10 +404,29 @@
                 return;
             }
             
+            // common.js의 로그인 상태 확인 함수 호출
+            checkLoginStatus();
+            
             // 현재 로그인한 사용자 정보 가져오기
             const userData = JSON.parse(currentUser);
+            
+            // 사용자의 프로필 데이터 가져오기 (없으면 초기화)
+            const userProfile = getUserProfileData(userData.username);
+            
+            // 프로필 기본 정보 설정
             document.querySelector('.profile-name').textContent = userData.nickname || userData.username;
             document.querySelector('.profile-avatar').textContent = (userData.nickname || userData.username).charAt(0);
+            
+            // 가입일 표시 - 실제 가입일 기준으로 표시
+            const registeredDate = new Date(userData.registeredAt || userData.createdAt);
+            const formattedDate = `${registeredDate.getFullYear()}년 ${registeredDate.getMonth() + 1}월 ${registeredDate.getDate()}일`;
+            document.querySelector('.profile-info p').textContent = `가입일: ${formattedDate}`;
+            
+            // 프로필 통계 정보 업데이트
+            document.querySelector('.stat-card:nth-child(1) .stat-value').textContent = `${userProfile.money.toLocaleString()} 원`;
+            document.querySelector('.stat-card:nth-child(2) .stat-value').textContent = `${userProfile.items} 개`;
+            document.querySelector('.stat-card:nth-child(3) .stat-value').textContent = `${userProfile.trades} 회`;
+            document.querySelector('.stat-card:nth-child(4) .stat-value').textContent = `${userProfile.friends.length} 명`;
             // 탭 전환 기능
             const tabs = document.querySelectorAll('.tab');
             const tabContents = document.querySelectorAll('.tab-content');
