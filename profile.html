@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>게임 아이템 거래소 - 프로필</title>
-    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="css/common.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -200,48 +200,31 @@
     </style>
 </head>
 <body>
+    <!-- 헤더 -->
     <header class="header">
-        <nav class="navbar">
-            <a href="index.html" class="logo">
-                <i class="fas fa-gamepad"></i>
-                게임 아이템 거래소
-            </a>
-            
-            <button class="menu-toggle" id="menuToggle">
-                <i class="fas fa-bars"></i>
-            </button>
-        </nav>
+        <a href="index.html" class="site-title">게임 아이템 거래소</a>
+        <button class="menu-btn" onclick="toggleMenu()">☰</button>
     </header>
 
-    <!-- 사이드바 -->
-    <div class="sidebar" id="sidebar">
-        <div class="sidebar-header">
-            <h3>메뉴</h3>
-            <button class="sidebar-close" id="sidebarClose">
-                <i class="fas fa-times"></i>
-            </button>
-        </div>
-        <ul class="sidebar-menu">
-            <li><a href="index.html"><i class="fas fa-home"></i> 홈</a></li>
-            <li><a href="market.html"><i class="fas fa-store"></i> 거래소</a></li>
-            <li><a href="board.html"><i class="fas fa-clipboard-list"></i> 게시판</a></li>
-            <li><a href="attendance.html"><i class="fas fa-calendar-check"></i> 출석체크</a></li>
-            <li><a href="storage.html"><i class="fas fa-warehouse"></i> 창고</a></li>
-            <li><a href="profile.html"><i class="fas fa-user"></i> 프로필</a></li>
-            <li><a href="login.html"><i class="fas fa-sign-in-alt"></i> 로그인</a></li>
-        </ul>
+    <!-- 사이드 메뉴 -->
+    <div class="side-menu">
+        <button class="side-menu-close" onclick="closeMenu()">×</button>
+        <a href="index.html" class="menu-item">홈</a>
+        <a href="attendance.html" class="menu-item">출석체크</a>
+        <a href="market.html" class="menu-item">거래소</a>
+        <a href="profile.html" class="menu-item">프로필</a>
+        <a href="community_board.html" class="menu-item">게시판</a>
+        <a href="login.html" class="menu-item">로그인</a>
+        <a href="register.html" class="menu-item">회원가입</a>
     </div>
-
-    <!-- 오버레이 -->
-    <div class="overlay" id="overlay"></div>
 
     <div class="container">
         <div class="profile-container">
             <div class="profile-header">
                 <div class="profile-avatar">사</div>
                 <div class="profile-info">
-                    <h1 class="profile-name">사용자123</h1>
-                    <p>가입일: 2024년 5월 15일</p>
+                    <h1 class="profile-name" id="profileName">사용자123</h1>
+                    <p>가입일: <span id="registrationDate"></span></p>
                 </div>
             </div>
             
@@ -260,7 +243,7 @@
                 </div>
                 <div class="stat-card">
                     <div class="stat-title">친구</div>
-                    <div class="stat-value">7 명</div>
+                    <div class="stat-value">0 명</div>
                 </div>
             </div>
             
@@ -273,34 +256,7 @@
             
             <div class="tab-content active" id="friends">
                 <div class="friend-list">
-                    <div class="friend-card">
-                        <div class="friend-avatar">김</div>
-                        <div class="friend-name">김철수</div>
-                    </div>
-                    <div class="friend-card">
-                        <div class="friend-avatar">이</div>
-                        <div class="friend-name">이영희</div>
-                    </div>
-                    <div class="friend-card">
-                        <div class="friend-avatar">박</div>
-                        <div class="friend-name">박지성</div>
-                    </div>
-                    <div class="friend-card">
-                        <div class="friend-avatar">최</div>
-                        <div class="friend-name">최동욱</div>
-                    </div>
-                    <div class="friend-card">
-                        <div class="friend-avatar">정</div>
-                        <div class="friend-name">정민수</div>
-                    </div>
-                    <div class="friend-card">
-                        <div class="friend-avatar">강</div>
-                        <div class="friend-name">강지원</div>
-                    </div>
-                    <div class="friend-card">
-                        <div class="friend-avatar">홍</div>
-                        <div class="friend-name">홍길동</div>
-                    </div>
+                    <p>아직 친구가 없습니다. 친구 추가 탭에서 친구를 추가해보세요.</p>
                 </div>
             </div>
             
@@ -371,7 +327,7 @@
     
     <div class="notification" id="notification"></div>
 
-    <script src="main.js"></script>
+    <script src="js/common.js"></script>
     <script>
         // 사용자의 프로필 데이터를 가져오는 함수 (없으면 초기화)
         function getUserProfileData(username) {
@@ -394,6 +350,7 @@
             
             return allProfiles[username];
         }
+        
         document.addEventListener('DOMContentLoaded', function() {
             // 로그인 상태 확인
             const currentUser = localStorage.getItem('currentUser');
@@ -545,8 +502,13 @@
                 friendCountElement.textContent = `${currentCount} 명`;
             }
             
-            // 실시간 친구 요청 시뮬레이션 (5초 후에 새 친구 요청 도착)
-            setTimeout(() => {
+            // 현재 날짜를 표시
+            const now = new Date();
+            const options = { year: 'numeric', month: 'long', day: 'numeric' };
+            document.getElementById('registrationDate').textContent = now.toLocaleDateString('ko-KR', options);
+            
+            /* 실시간 친구 요청 시뮬레이션 제거 */
+            /*setTimeout(() => {
                 const requestsList = document.getElementById('requests').querySelector('.friend-list');
                 const newRequestCard = document.createElement('div');
                 newRequestCard.className = 'friend-card';
@@ -596,8 +558,8 @@
                 });
                 
                 // 알림 표시
-                showNotification('새로운 친구 요청이 도착했습니다.');
-            }, 5000);
+                // showNotification('새로운 친구 요청이 도착했습니다!');
+            }, 5000);*/
         });
     </script>
 </body>
