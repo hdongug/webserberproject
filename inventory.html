@@ -1,0 +1,590 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>게임 아이템 거래소 - 내 창고</title>
+    <link rel="stylesheet" href="css/common.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-purple: #6B46C1;
+            --light-purple: #8B5CF6;
+            --dark-purple: #553C9A;
+            --common-color: #9e9e9e;
+            --uncommon-color: #4caf50;
+            --rare-color: #2196f3;
+            --epic-color: #9c27b0;
+            --legendary-color: #ff9800;
+            --mythic-color: #e91e63;
+            --unique-color: #f44336;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 20px auto;
+            padding: 0 20px;
+        }
+
+        .inventory-container {
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            margin-bottom: 30px;
+        }
+
+        .inventory-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .inventory-title {
+            font-size: 1.8rem;
+            color: var(--primary-purple);
+            font-weight: 600;
+        }
+
+        .inventory-stats {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            color: #666;
+        }
+
+        .inventory-stat {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            background-color: #f8f9fa;
+            padding: 8px 12px;
+            border-radius: 20px;
+        }
+
+        .inventory-stat i {
+            color: var(--primary-purple);
+        }
+
+        .inventory-actions {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .inventory-filters {
+            display: flex;
+            gap: 10px;
+        }
+
+        .filter-btn {
+            background: #f1f1f1;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .filter-btn:hover, .filter-btn.active {
+            background: var(--light-purple);
+            color: white;
+        }
+
+        .items-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 20px;
+        }
+
+        .item-card {
+            background: white;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            transition: transform 0.3s, box-shadow 0.3s;
+            border: 1px solid #eee;
+            position: relative;
+        }
+
+        .item-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        .item-image {
+            height: 180px;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #f9f9f9;
+        }
+
+        .item-image img {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+        }
+
+        .item-content {
+            padding: 15px;
+        }
+
+        .item-rarity {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            padding: 4px 8px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            color: white;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+        }
+
+        .rarity-common {
+            background-color: var(--common-color);
+        }
+
+        .rarity-uncommon {
+            background-color: var(--uncommon-color);
+        }
+
+        .rarity-rare {
+            background-color: var(--rare-color);
+        }
+
+        .rarity-epic {
+            background-color: var(--epic-color);
+        }
+
+        .rarity-legendary {
+            background-color: var(--legendary-color);
+        }
+
+        .rarity-mythic {
+            background-color: var(--mythic-color);
+        }
+
+        .rarity-unique {
+            background-color: var(--unique-color);
+        }
+
+        .item-name {
+            font-weight: 600;
+            font-size: 1.2rem;
+            margin-bottom: 5px;
+            color: #333;
+        }
+
+        .item-description {
+            color: #666;
+            font-size: 0.9rem;
+            margin-bottom: 10px;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .item-stats {
+            font-size: 0.9rem;
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        .item-stat {
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .item-action-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .btn-sell, .btn-use, .btn-details {
+            flex: 1;
+            padding: 8px 0;
+            border: none;
+            border-radius: 4px;
+            color: white;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background-color 0.2s;
+            text-align: center;
+        }
+
+        .btn-sell {
+            background-color: var(--primary-purple);
+        }
+
+        .btn-sell:hover {
+            background-color: var(--dark-purple);
+        }
+
+        .btn-use {
+            background-color: #4CAF50;
+        }
+
+        .btn-use:hover {
+            background-color: #388E3C;
+        }
+
+        .btn-details {
+            background-color: #2196F3;
+        }
+
+        .btn-details:hover {
+            background-color: #1976D2;
+        }
+
+        .empty-inventory {
+            text-align: center;
+            padding: 40px 20px;
+            color: #666;
+        }
+
+        .empty-inventory i {
+            font-size: 3rem;
+            color: #ddd;
+            margin-bottom: 15px;
+        }
+
+        .empty-inventory h3 {
+            margin-bottom: 10px;
+            color: #333;
+        }
+
+        .empty-inventory p {
+            margin-bottom: 20px;
+        }
+
+        .empty-inventory .btn {
+            background-color: var(--primary-purple);
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            font-weight: 500;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .inventory-info {
+            background-color: #f8f9fa;
+            border-left: 4px solid var(--primary-purple);
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 0 4px 4px 0;
+        }
+
+        /* 판매 모달 */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+        }
+
+        .modal-content {
+            background-color: white;
+            margin: 10% auto;
+            padding: 20px;
+            border-radius: 8px;
+            width: 90%;
+            max-width: 500px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            position: relative;
+        }
+
+        .close-modal {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            font-size: 1.5rem;
+            color: #aaa;
+            cursor: pointer;
+        }
+
+        .close-modal:hover {
+            color: #333;
+        }
+
+        .modal-header {
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .modal-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: var(--primary-purple);
+        }
+
+        .modal-body {
+            margin-bottom: 20px;
+        }
+
+        .modal-item-details {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .modal-item-image {
+            width: 100px;
+            height: 100px;
+            border-radius: 8px;
+            overflow: hidden;
+            background: #f9f9f9;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-item-image img {
+            max-width: 100%;
+            max-height: 100%;
+        }
+
+        .modal-item-info {
+            flex: 1;
+        }
+
+        .modal-item-name {
+            font-weight: 600;
+            font-size: 1.2rem;
+            margin-bottom: 5px;
+            color: #333;
+        }
+
+        .modal-item-rarity {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            color: white;
+            margin-bottom: 10px;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 500;
+            color: #333;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 1rem;
+        }
+
+        .form-group .input-with-icon {
+            position: relative;
+        }
+
+        .form-group .input-with-icon i {
+            position: absolute;
+            left: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #666;
+        }
+
+        .form-group .input-with-icon input {
+            padding-left: 35px;
+        }
+
+        .modal-footer {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+        }
+
+        .modal-btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            font-weight: 500;
+            cursor: pointer;
+        }
+
+        .btn-cancel {
+            background-color: #f1f1f1;
+            color: #333;
+        }
+
+        .btn-confirm {
+            background-color: var(--primary-purple);
+            color: white;
+        }
+
+        .btn-cancel:hover {
+            background-color: #e1e1e1;
+        }
+
+        .btn-confirm:hover {
+            background-color: var(--dark-purple);
+        }
+
+        /* 알림 메시지 */
+        .notification {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background-color: #333;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 4px;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2);
+            opacity: 0;
+            transform: translateY(20px);
+            transition: opacity 0.3s, transform 0.3s;
+            z-index: 1100;
+        }
+
+        .notification.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        @media (max-width: 768px) {
+            .items-grid {
+                grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            }
+            
+            .inventory-actions {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 15px;
+            }
+            
+            .inventory-filters {
+                width: 100%;
+                overflow-x: auto;
+                padding-bottom: 10px;
+            }
+            
+            .filter-btn {
+                white-space: nowrap;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- 헤더 -->
+    <header class="header">
+        <a href="index.html" class="site-title">게임 아이템 거래소</a>
+        <button class="menu-btn" onclick="toggleMenu()">☰</button>
+    </header>
+
+    <!-- 사이드 메뉴 -->
+    <div class="side-menu">
+        <button class="side-menu-close" onclick="closeMenu()">×</button>
+        <a href="index.html" class="menu-item">홈</a>
+        <a href="attendance.html" class="menu-item">출석체크</a>
+        <a href="market.html" class="menu-item">거래소</a>
+        <a href="inventory.html" class="menu-item active">내 창고</a>
+        <a href="profile.html" class="menu-item">프로필</a>
+        <a href="board.html" class="menu-item">게시판</a>
+        <a href="login.html" class="menu-item" id="loginMenu">로그인</a>
+        <a href="register.html" class="menu-item" id="registerMenu">회원가입</a>
+    </div>
+
+    <div class="container">
+        <!-- 로그인 세션 -->
+        <div class="login-section" id="loginSection">
+            <!-- 여기에 로그인 상태 표시 -->
+        </div>
+
+        <div class="inventory-container">
+            <div class="inventory-header">
+                <div class="inventory-title">내 창고</div>
+                <div class="inventory-stats">
+                    <div class="inventory-stat">
+                        <i class="fas fa-cube"></i>
+                        <span id="totalItems">0</span> 아이템
+                    </div>
+                    <div class="inventory-stat">
+                        <i class="fas fa-coins"></i>
+                        <span id="totalValue">0</span> 골드
+                    </div>
+                </div>
+            </div>
+
+            <div class="inventory-info">
+                <p><i class="fas fa-info-circle"></i> 창고에 있는 아이템을 거래소에 판매하거나 사용할 수 있습니다. 아이템을 판매하면 즉시 골드로 변환됩니다.</p>
+            </div>
+
+            <div class="inventory-actions">
+                <div class="inventory-filters">
+                    <button class="filter-btn active" data-filter="all">모두 보기</button>
+                    <button class="filter-btn" data-filter="weapon">무기</button>
+                    <button class="filter-btn" data-filter="armor">방어구</button>
+                    <button class="filter-btn" data-filter="accessory">액세서리</button>
+                    <button class="filter-btn" data-filter="consumable">소비 아이템</button>
+                </div>
+            </div>
+
+            <div class="items-grid" id="inventoryItems">
+                <!-- 아이템들이 여기에 동적으로 추가됩니다 -->
+            </div>
+        </div>
+    </div>
+
+    <!-- 판매 모달 -->
+    <div class="modal" id="sellModal">
+        <div class="modal-content">
+            <span class="close-modal" onclick="closeSellModal()">&times;</span>
+            <div class="modal-header">
+                <div class="modal-title">아이템 판매</div>
+            </div>
+            <div class="modal-body">
+                <div class="modal-item-details" id="modalItemDetails">
+                    <!-- 아이템 정보 -->
+                </div>
+                <div class="form-group">
+                    <label for="sellPrice">판매 가격</label>
+                    <div class="input-with-icon">
+                        <i class="fas fa-coins"></i>
+                        <input type="number" id="sellPrice" min="1" placeholder="판매 가격을 입력하세요">
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="modal-btn btn-cancel" onclick="closeSellModal()">취소</button>
+                <button class="modal-btn btn-confirm" onclick="confirmSell()">판매하기</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 알림 메시지 -->
+    <div class="notification" id="notification"></div>
+
+    <script src="js/common.js"></script>
+    <script src="js/inventory.js"></script>
+</body>
+</html>
