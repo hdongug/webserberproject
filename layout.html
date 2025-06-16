@@ -43,6 +43,7 @@
             <li><a th:href="@{/items}"><i class="fas fa-store"></i> 거래소</a></li>
             <li><a th:href="@{/board}"><i class="fas fa-clipboard-list"></i> 게시판</a></li>
             <li><a th:href="@{/attendance}"><i class="fas fa-calendar-check"></i> 출석체크</a></li>
+            <li sec:authorize="isAuthenticated()"><a th:href="@{/inventory.html}"><i class="fas fa-warehouse"></i> 창고</a></li>
             <li sec:authorize="!isAuthenticated()"><a th:href="@{/login}"><i class="fas fa-sign-in-alt"></i> 로그인</a></li>
             <li sec:authorize="!isAuthenticated()"><a th:href="@{/register}"><i class="fas fa-user-plus"></i> 회원가입</a></li>
             <li sec:authorize="isAuthenticated()"><a th:href="@{/mypage}"><i class="fas fa-user"></i> 마이페이지</a></li>
