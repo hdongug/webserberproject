@@ -84,15 +84,44 @@ function updateSideMenuByLoginStatus(isLoggedIn) {
     
     // 프로필 메뉴 아이템 찾기
     const profileMenuItem = sideMenu.querySelector('a[href="profile.html"]');
+    // 로그인/회원가입 메뉴 아이템 찾기
+    const loginMenuItem = sideMenu.querySelector('a[href="login.html"]');
+    const registerMenuItem = sideMenu.querySelector('a[href="register.html"]');
     
-    if (profileMenuItem) {
-        if (isLoggedIn) {
-            // 로그인 상태이면 프로필 메뉴 표시
-            profileMenuItem.style.display = 'block';
+    // 로그아웃 메뉴 아이템 생성 또는 가져오기
+    let logoutMenuItem = sideMenu.querySelector('.logout-menu-item');
+    if (!logoutMenuItem && isLoggedIn) {
+        // 로그아웃 메뉴가 없으면 생성
+        logoutMenuItem = document.createElement('a');
+        logoutMenuItem.href = '#';
+        logoutMenuItem.className = 'menu-item logout-menu-item';
+        logoutMenuItem.textContent = '로그아웃';
+        logoutMenuItem.onclick = function(e) {
+            e.preventDefault();
+            logout();
+        };
+        
+        // 사이드 메뉴에 추가 (회원가입 아이템 앞에)
+        if (registerMenuItem && registerMenuItem.parentNode) {
+            sideMenu.insertBefore(logoutMenuItem, registerMenuItem);
         } else {
-            // 로그인하지 않은 상태이면 프로필 메뉴 숨김
-            profileMenuItem.style.display = 'none';
+            sideMenu.appendChild(logoutMenuItem);
         }
+    }
+    
+    // 로그인 상태에 따라 메뉴 표시/숨김 설정
+    if (isLoggedIn) {
+        // 로그인 상태
+        if (profileMenuItem) profileMenuItem.style.display = 'block';
+        if (loginMenuItem) loginMenuItem.style.display = 'none';
+        if (registerMenuItem) registerMenuItem.style.display = 'none';
+        if (logoutMenuItem) logoutMenuItem.style.display = 'block';
+    } else {
+        // 비로그인 상태
+        if (profileMenuItem) profileMenuItem.style.display = 'none';
+        if (loginMenuItem) loginMenuItem.style.display = 'block';
+        if (registerMenuItem) registerMenuItem.style.display = 'block';
+        if (logoutMenuItem) logoutMenuItem.style.display = 'none';
     }
 }
 
