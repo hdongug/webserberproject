@@ -11,6 +11,8 @@
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
         :root {
+            --primary-color: #4CAF50;
+            --hover-color: #3e8e41;
             --common-color: #9e9e9e;
             --uncommon-color: #4caf50;
             --rare-color: #2196f3;
@@ -69,6 +71,40 @@
         
         .btn:hover {
             background-color: #3e8e41;
+        }
+        
+        .item-buttons {
+            display: flex;
+            gap: 8px;
+            margin-top: 10px;
+        }
+        
+        .btn-buy, .btn-details {
+            padding: 8px 12px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: all 0.2s;
+            flex: 1;
+        }
+        
+        .btn-buy {
+            background-color: var(--primary-color);
+            color: white;
+        }
+        
+        .btn-buy:hover {
+            background-color: var(--hover-color);
+        }
+        
+        .btn-details {
+            background-color: #f5f5f5;
+            border: 1px solid #ddd;
+        }
+        
+        .btn-details:hover {
+            background-color: #e0e0e0;
         }
         
         .filters {
@@ -267,7 +303,10 @@
                     <div class="item-description">공호한 심연속에 있는 이름 모를 어느 황제 의 검이다.</div>
                     <div class="item-effects">평타를 5번 이상 때리면 광폭화로 방마저가 10%깍이는 대신 공격력 이 200%증가한다.<br>공격력이 750 이상일 경우 공격력을 추가적으로 500을 더 얻는다.</div>
                     <div class="item-price">125,000원</div>
-
+                    <div class="item-buttons">
+                        <button class="btn-buy">구매하기</button>
+                        <button class="btn-details">상세 정보</button>
+                    </div>
                 </div>
             </div>
             
@@ -298,7 +337,10 @@
                     <div class="item-description">이 아이템은 악마의 아이템으로 검으로 다르킨이라는 장비로 무기에 따라 특수 능력을 사용을 할 수 있다.</div>
                     <div class="item-effects">1중첩당 공격력의 10% 추가적으로 출혈 데미지와 최대 중첩까지 쌓으면 공격력을 25% 추가적으로 얻을 수 있다. 출 수 있다(최대 중첩 5회 + 최대 출혈 데미지 50% )<br>다르킨 효과 : 다르킨의 장비로 맞추면 사신의 힘을 개방을 할 수 있으며, 1% 확률로 즉사를 시킬수 있다.</div>
                     <div class="item-price">125,000원</div>
-
+                    <div class="item-buttons">
+                        <button class="btn-buy">구매하기</button>
+                        <button class="btn-details">상세 정보</button>
+                    </div>
                 </div>
             </div>
             
@@ -313,7 +355,10 @@
                     <div class="item-stats">마력 +10 마나 회복: 5%</div>
                     <div class="item-description">맘법 협회에서 마법사들의 마력을 보조를 해주기 우이나 기본 아이템이다.</div>
                     <div class="item-price">1,000원</div>
-
+                    <div class="item-buttons">
+                        <button class="btn-buy">구매하기</button>
+                        <button class="btn-details">상세 정보</button>
+                    </div>
                 </div>
             </div>
             
@@ -329,7 +374,10 @@
                     <div class="item-description">옷 어느 제국 국가에서 장군이 쓰던 도끼이다.</div>
                     <div class="item-effects">스킬 및 평타를 떨리면 방어력이 감소한다.(중첩횟수 5회, 최대 방어력 감소 25% 감소)</div>
                     <div class="item-price">100,000원</div>
-
+                    <div class="item-buttons">
+                        <button class="btn-buy">구매하기</button>
+                        <button class="btn-details">상세 정보</button>
+                    </div>
                 </div>
             </div>
             
@@ -345,7 +393,10 @@
                     <div class="item-description">천공 제국 대장장이가 제작한 아이템이다.</div>
                     <div class="item-effects">치명타가 터지면 5초 동안 공격속도가 200% 증가한다.</div>
                     <div class="item-price">100,000원</div>
-
+                    <div class="item-buttons">
+                        <button class="btn-buy">구매하기</button>
+                        <button class="btn-details">상세 정보</button>
+                    </div>
                 </div>
             </div>
             
@@ -362,6 +413,10 @@
                     <div class="item-effects">치명타로 데미지 입을 시 1.5초간 출혈효과가 생긴다 (출혈 데미지 공격력 10%)<br>25% 확률로 관통을 해서 뒤에 있는 몬스터도 맞출수 있다.</div>
                     <div class="item-price">500,000원</div>
                     <div class="item-seller">
+                    </div>
+                    <div class="item-buttons">
+                        <button class="btn-buy">구매하기</button>
+                        <button class="btn-details">상세 정보</button>
                     </div>
                 </div>
             </div>
@@ -393,7 +448,10 @@
                     <div class="item-stats">공격력 +10 치명타 데미지 5%</div>
                     <div class="item-description">아르카 제국의 궁수들이 사용하던 무기이다.</div>
                     <div class="item-price">1,000원</div>
-
+                    <div class="item-buttons">
+                        <button class="btn-buy">구매하기</button>
+                        <button class="btn-details">상세 정보</button>
+                    </div>
                 </div>
             </div>
             
@@ -408,7 +466,10 @@
                     <div class="item-stats">방어력 +10 체력 +10</div>
                     <div class="item-description">어느 제국의 갑옷이다.</div>
                     <div class="item-price">1,000원</div>
-
+                    <div class="item-buttons">
+                        <button class="btn-buy">구매하기</button>
+                        <button class="btn-details">상세 정보</button>
+                    </div>
                 </div>
             </div>
             
@@ -425,7 +486,10 @@
                     <div class="item-effects">공격력인 아이템을 마력으로 치환된다.</div>
                     <div class="item-effects set">에테르 장갑 + 에테르 후드 착용시 마력 100추가, 마력 100 추가</div>
                     <div class="item-price">50,000원</div>
-
+                    <div class="item-buttons">
+                        <button class="btn-buy">구매하기</button>
+                        <button class="btn-details">상세 정보</button>
+                    </div>
                 </div>
             </div>
             
@@ -442,14 +506,17 @@
                     <div class="item-effects">스킬 감속 +20% 마력 +100</div>
                     <div class="item-effects set">에테르 장갑 + 에테르 후드 착용시 마력 100추가, 마력 100 추가</div>
                     <div class="item-price">50,000원</div>
-
+                    <div class="item-buttons">
+                        <button class="btn-buy">구매하기</button>
+                        <button class="btn-details">상세 정보</button>
+                    </div>
                 </div>
             </div>
             
             <!-- 아이템 13: 체력회복 물약 -->
             <div class="item-card">
                 <div class="item-image">
-                    <img src="images/PNG/KakaoTalk_20250510_213329962.png" alt="체력회복 물약">
+                    <img src="/PNG/KakaoTalk_20250510_213329962.png" alt="체력회복 물약">
                 </div>
                 <div class="item-content">
                     <h3 class="item-title">체력회복</h3>
@@ -457,12 +524,16 @@
                     <div class="item-description">일반 물약이다.</div>
                     <div class="item-effects">10초 동안 전체 체력의 5%씩 체력을 회복을 한다.</div>
                     <div class="item-price">2,500원</div>
-
+                    <div class="item-buttons">
+                        <button class="btn-buy">구매하기</button>
+                        <button class="btn-details">상세 정보</button>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 
-    <script src="main.js"></script>
+    <script src="js/common.js"></script>
+    <script src="js/market.js"></script>
 </body>
 </html>
