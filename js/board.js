@@ -75,16 +75,22 @@ function displayPosts(category = 'all') {
         regularPosts = posts.filter(post => !post.isNotice && post.category === category);
     }
     
+    // 정렬된 일반 게시글 (내림차순)
+    regularPosts.sort((a, b) => b.id - a.id);
+    
+    // 순번 카운터 (일반 게시글용)
+    let displayNumber = regularPosts.length;
+    
     // 공지사항 표시
     noticePosts.forEach(post => {
-        const row = createPostRow(post, true);
+        const row = createPostRow(post, true, 0);
         tableBody.appendChild(row);
     });
     
     // 일반 게시글 표시
     if (regularPosts.length > 0) {
         regularPosts.forEach(post => {
-            const row = createPostRow(post, false);
+            const row = createPostRow(post, false, displayNumber--);
             tableBody.appendChild(row);
         });
     } else {
@@ -96,7 +102,7 @@ function displayPosts(category = 'all') {
 }
 
 // 게시글 행 생성
-function createPostRow(post, isNotice) {
+function createPostRow(post, isNotice, displayNumber) {
     const row = document.createElement('tr');
     if (isNotice) row.classList.add('notice');
     
@@ -104,8 +110,13 @@ function createPostRow(post, isNotice) {
     const isNew = isRecentPost(post.date);
     const newTag = isNew ? '<span class="new-tag">NEW</span>' : '';
     
+    // 공지는 "공지"로 표시, 일반 게시글은 리스트에서의 순번으로 표시
+    const numberDisplay = isNotice ? 
+        '<span style="color: #4527a0; font-weight: bold;">공지</span>' : 
+        displayNumber;
+    
     row.innerHTML = `
-        <td class="center">${isNotice ? '<span style="color: #4527a0; font-weight: bold;">공지</span>' : post.id}</td>
+        <td class="center">${numberDisplay}</td>
         <td><a href="#" onclick="viewPost(${post.id}); return false;">${post.title}</a> ${newTag}</td>
         <td class="center">${post.author}</td>
         <td class="center">${post.date}</td>
@@ -145,12 +156,21 @@ function viewPost(postId) {
             document.querySelector('.container').appendChild(postDetailContainer);
         }
         
+        // 현재 로그인한 사용자 정보 가져오기
+        const currentUser = JSON.parse(localStorage.getItem('currentUser')) || {};
+        const isAuthor = currentUser.nickname === post.author || currentUser.username === post.author;
+        
         // 상세 내용 채우기
         postDetailContainer.innerHTML = `
             <div class="post-header">
                 <h2>${post.title}</h2>
                 <div class="post-actions">
                     <a href="#" class="btn" onclick="showBoardList(); return false;">목록</a>
+                    <a href="#" class="btn" onclick="window.history.back(); return false;">뒤로가기</a>
+                    ${isAuthor ? `
+                    <a href="#" class="btn btn-edit" onclick="showEditPostForm(${post.id}); return false;">수정</a>
+                    <a href="#" class="btn btn-delete" onclick="confirmDeletePost(${post.id}); return false;">삭제</a>
+                    ` : ''}
                 </div>
             </div>
             <div class="post-meta">
@@ -158,6 +178,22 @@ function viewPost(postId) {
                 <div>작성일: ${post.date} | 조회수: ${post.views.toLocaleString()}</div>
             </div>
             <div class="post-content">${post.content.replace(/\n/g, '<br>')}</div>
+            
+            <div class="post-comments">
+                <h3>댓글 <span id="comment-count">${getComments(post.id).length}</span></h3>
+                <div class="comments-container" id="comments-container-${post.id}">
+                    ${renderComments(post.id)}
+                </div>
+                
+                <div class="comment-form">
+                    ${localStorage.getItem('isLoggedIn') === 'true' ? `
+                    <textarea id="comment-text" placeholder="댓글을 입력하세요"></textarea>
+                    <button class="btn" onclick="addComment(${post.id}); return false;">댓글 등록</button>
+                    ` : `
+                    <p class="login-needed">댓글을 남기려면 <a href="login.html">로그인</a>하세요.</p>
+                    `}
+                </div>
+            </div>
         `;
         
         // 상세 보기 표시
@@ -328,10 +364,288 @@ function showAlert(message, type) {
     }, 3000);
 }
 
+// 댓글 관련 기능 -------------------
+
+// 댓글 저장소 초기화
+function initializeComments() {
+    if (!localStorage.getItem('postComments')) {
+        localStorage.setItem('postComments', JSON.stringify({}));
+    }
+}
+
+// 댓글 가져오기
+function getComments(postId) {
+    const commentsStore = JSON.parse(localStorage.getItem('postComments') || '{}');
+    return commentsStore[postId] || [];
+}
+
+// 댓글 렌더링
+function renderComments(postId) {
+    const comments = getComments(postId);
+    
+    if (comments.length === 0) {
+        return '<p class="no-comments">등록된 댓글이 없습니다.</p>';
+    }
+    
+    return comments.map((comment, index) => {
+        // 현재 사용자가 댓글 작성자인지 확인
+        const currentUser = JSON.parse(localStorage.getItem('currentUser')) || {};
+        const isAuthor = currentUser.nickname === comment.author || currentUser.username === comment.author;
+        
+        return `
+            <div class="comment" id="comment-${postId}-${index}">
+                <div class="comment-header">
+                    <span class="comment-author">${comment.author}</span>
+                    <span class="comment-date">${comment.date}</span>
+                    ${isAuthor ? `<button class="btn-delete-comment" onclick="deleteComment(${postId}, ${index}); return false;">삭제</button>` : ''}
+                </div>
+                <div class="comment-content">${comment.content.replace(/\n/g, '<br>')}</div>
+            </div>
+        `;
+    }).join('');
+}
+
+// 댓글 추가
+function addComment(postId) {
+    // 로그인 확인
+    if (localStorage.getItem('isLoggedIn') !== 'true') {
+        alert('로그인 후 이용해주세요.');
+        return;
+    }
+    
+    const commentText = document.getElementById('comment-text').value.trim();
+    
+    if (commentText === '') {
+        alert('댓글 내용을 입력해주세요.');
+        return;
+    }
+    
+    // 현재 로그인한 사용자 정보
+    const currentUser = JSON.parse(localStorage.getItem('currentUser'));
+    if (!currentUser) return;
+    
+    const author = currentUser.nickname || currentUser.username;
+    
+    // 현재 날짜 생성
+    const now = new Date();
+    const year = now.getFullYear();
+    const month = String(now.getMonth() + 1).padStart(2, '0');
+    const day = String(now.getDate()).padStart(2, '0');
+    const hours = String(now.getHours()).padStart(2, '0');
+    const minutes = String(now.getMinutes()).padStart(2, '0');
+    const dateString = `${year}-${month}-${day} ${hours}:${minutes}`;
+    
+    // 새 댓글 객체
+    const newComment = {
+        author: author,
+        content: commentText,
+        date: dateString
+    };
+    
+    // 기존 댓글 가져오기
+    const commentsStore = JSON.parse(localStorage.getItem('postComments') || '{}');
+    const comments = commentsStore[postId] || [];
+    
+    // 댓글 추가
+    comments.push(newComment);
+    commentsStore[postId] = comments;
+    
+    // 댓글 저장
+    localStorage.setItem('postComments', JSON.stringify(commentsStore));
+    
+    // 댓글 목록 갱신
+    document.getElementById(`comments-container-${postId}`).innerHTML = renderComments(postId);
+    document.getElementById('comment-count').textContent = comments.length;
+    
+    // 댓글 입력창 초기화
+    document.getElementById('comment-text').value = '';
+}
+
+// 댓글 삭제
+function deleteComment(postId, commentIndex) {
+    if (!confirm('댓글을 삭제하시겠습니까?')) return;
+    
+    // 기존 댓글 가져오기
+    const commentsStore = JSON.parse(localStorage.getItem('postComments') || '{}');
+    let comments = commentsStore[postId] || [];
+    
+    // 댓글 삭제
+    comments.splice(commentIndex, 1);
+    commentsStore[postId] = comments;
+    
+    // 댓글 저장
+    localStorage.setItem('postComments', JSON.stringify(commentsStore));
+    
+    // 댓글 목록 갱신
+    document.getElementById(`comments-container-${postId}`).innerHTML = renderComments(postId);
+    document.getElementById('comment-count').textContent = comments.length;
+}
+
+// 게시물 수정 & 삭제 관련 기능 -------------------
+
+// 게시물 수정 폼 표시
+function showEditPostForm(postId) {
+    const posts = getPosts();
+    const post = posts.find(p => p.id === postId);
+    
+    if (!post) return;
+    
+    // 현재 로그인한 사용자 정보 가져오기
+    const currentUser = JSON.parse(localStorage.getItem('currentUser')) || {};
+    const isAuthor = currentUser.nickname === post.author || currentUser.username === post.author;
+    
+    // 작성자 확인
+    if (!isAuthor) {
+        alert('게시물 작성자만 수정할 수 있습니다.');
+        return;
+    }
+    
+    // 게시판, 상세 보기 숨기기
+    document.querySelector('.board-container').style.display = 'none';
+    const postDetailContainer = document.querySelector('.post-detail');
+    if (postDetailContainer) {
+        postDetailContainer.style.display = 'none';
+    }
+    
+    // 글쓰기 폼 생성 또는 가져오기
+    let postFormContainer = document.querySelector('.post-form');
+    if (!postFormContainer) {
+        postFormContainer = document.createElement('div');
+        postFormContainer.className = 'post-form';
+        document.querySelector('.container').appendChild(postFormContainer);
+    }
+    
+    // 폼 내용 채우기
+    postFormContainer.innerHTML = `
+        <h2>게시글 수정</h2>
+        <div id="postAlert" class="alert"></div>
+        <form id="postForm">
+            <input type="hidden" id="postId" value="${post.id}">
+            <div class="form-group">
+                <label for="postCategory">카테고리</label>
+                <select id="postCategory" class="form-control" required>
+                    <option value="free"${post.category === 'free' ? ' selected' : ''}>자유</option>
+                    <option value="info"${post.category === 'info' ? ' selected' : ''}>정보</option>
+                    <option value="trade"${post.category === 'trade' ? ' selected' : ''}>거래</option>
+                    <option value="qna"${post.category === 'qna' ? ' selected' : ''}>문의</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="postTitle">제목</label>
+                <input type="text" id="postTitle" class="form-control" value="${post.title}" required>
+            </div>
+            <div class="form-group">
+                <label for="postContent">내용</label>
+                <textarea id="postContent" class="form-control" required>${post.content}</textarea>
+            </div>
+            <div class="form-actions">
+                <button type="button" class="btn" onclick="viewPost(${post.id})">취소</button>
+                <button type="button" class="btn" onclick="updatePost()">수정</button>
+            </div>
+        </form>
+    `;
+    
+    // 폼 표시
+    postFormContainer.style.display = 'block';
+    
+    // 제목 변경
+    document.title = '게시글 수정 - 게시판 | 게임 아이템 거래소';
+}
+
+// 게시글 수정
+function updatePost() {
+    const postId = parseInt(document.getElementById('postId').value);
+    const category = document.getElementById('postCategory').value;
+    const title = document.getElementById('postTitle').value;
+    const content = document.getElementById('postContent').value;
+    
+    // 유효성 검사
+    if (!title.trim() || !content.trim()) {
+        showAlert('제목과 내용을 모두 입력해주세요.', 'danger');
+        return;
+    }
+    
+    // 게시글 찾기
+    const posts = getPosts();
+    const postIndex = posts.findIndex(p => p.id === postId);
+    
+    if (postIndex === -1) return;
+    
+    // 현재 로그인한 사용자 정보 가져오기
+    const currentUser = JSON.parse(localStorage.getItem('currentUser')) || {};
+    const isAuthor = currentUser.nickname === posts[postIndex].author || currentUser.username === posts[postIndex].author;
+    
+    // 작성자 확인
+    if (!isAuthor) {
+        showAlert('게시글 작성자만 수정할 수 있습니다.', 'danger');
+        return;
+    }
+    
+    // 게시글 수정
+    posts[postIndex].category = category;
+    posts[postIndex].title = title;
+    posts[postIndex].content = content;
+    
+    // 게시글 저장
+    localStorage.setItem('boardPosts', JSON.stringify(posts));
+    
+    // 성공 메시지 표시
+    showAlert('게시글이 수정되었습니다.', 'success');
+    
+    // 게시글 상세 보기로 돌아가기 (1초 후)
+    setTimeout(() => {
+        viewPost(postId);
+    }, 1000);
+}
+
+// 게시글 삭제 확인
+function confirmDeletePost(postId) {
+    if (confirm('게시글을 삭제하시겠습니까?')) {
+        deletePost(postId);
+    }
+}
+
+// 게시글 삭제
+function deletePost(postId) {
+    // 게시글 찾기
+    const posts = getPosts();
+    const postIndex = posts.findIndex(p => p.id === postId);
+    
+    if (postIndex === -1) return;
+    
+    // 현재 로그인한 사용자 정보 가져오기
+    const currentUser = JSON.parse(localStorage.getItem('currentUser')) || {};
+    const isAuthor = currentUser.nickname === posts[postIndex].author || currentUser.username === posts[postIndex].author;
+    
+    // 작성자 확인
+    if (!isAuthor) {
+        alert('게시글 작성자만 삭제할 수 있습니다.');
+        return;
+    }
+    
+    // 게시글 삭제
+    posts.splice(postIndex, 1);
+    
+    // 게시글 저장
+    localStorage.setItem('boardPosts', JSON.stringify(posts));
+    
+    // 게시판으로 돌아가기
+    alert('게시글이 삭제되었습니다.');
+    showBoardList();
+    
+    // 해당 게시글의 댓글 모두 삭제
+    const commentsStore = JSON.parse(localStorage.getItem('postComments') || '{}');
+    delete commentsStore[postId];
+    localStorage.setItem('postComments', JSON.stringify(commentsStore));
+}
+
 // 페이지 로드 시 실행
 document.addEventListener('DOMContentLoaded', function() {
     // 게시글 초기화
     initializeBoardPosts();
+    
+    // 댓글 저장소 초기화
+    initializeComments();
     
     // 탭 클릭 이벤트
     const tabContainer = document.querySelector('.tab-container');

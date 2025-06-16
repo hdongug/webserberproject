@@ -996,7 +996,7 @@
                     addButton.className = 'btn-sm btn-add';
                     addButton.textContent = '친구 요청';
                     addButton.onclick = function() {
-                        showConfirmModal(user.username, user.nickname);
+                        sendFriendRequest(user.username, user.nickname);
                     };
                     
                     resultCard.appendChild(userAvatar);
