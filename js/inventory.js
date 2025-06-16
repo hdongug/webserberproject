@@ -73,13 +73,23 @@ const sampleItems = [
 // 전역 변수
 let currentUser = null;
 let userInventory = [];
+let showcaseItems = [];
 let currentFilter = 'all';
 let selectedItemForSell = null;
+let currentTab = 'inventory';
 
 // DOM이 로드된 후 초기화
 document.addEventListener('DOMContentLoaded', function() {
     // 로그인 상태 확인 및 UI 업데이트
     checkLoginStatus();
+    
+    // 탭 전환 버튼에 이벤트 리스너 추가
+    const tabButtons = document.querySelectorAll('.tab-btn');
+    tabButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            switchTab(this.dataset.tab);
+        });
+    });
     
     // 필터 버튼에 이벤트 리스너 추가
     const filterButtons = document.querySelectorAll('.filter-btn');
@@ -97,6 +107,9 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // 사용자 인벤토리 로드 및 표시
     loadUserInventory();
+    
+    // 진열장 로드 및 표시
+    loadShowcaseItems();
     
     // 창고 통계 업데이트
     updateInventoryStats();
@@ -178,6 +191,68 @@ function saveInventory() {
     if (!currentUser) return;
     localStorage.setItem(`inventory_${currentUser.username}`, JSON.stringify(userInventory));
     updateInventoryStats();
+}
+
+/**
+ * 진열장 아이템 로드
+ */
+function loadShowcaseItems() {
+    if (!currentUser) return;
+    
+    // 로컬 스토리지에서 진열장 데이터 가져오기
+    const showcaseData = localStorage.getItem(`showcase_${currentUser.username}`);
+    
+    if (showcaseData) {
+        showcaseItems = JSON.parse(showcaseData);
+    } else {
+        showcaseItems = [];
+    }
+    
+    // 진열장 아이템 표시
+    displayShowcaseItems();
+}
+
+/**
+ * 진열장 저장 (로컬 스토리지)
+ */
+function saveShowcase() {
+    if (!currentUser) return;
+    localStorage.setItem(`showcase_${currentUser.username}`, JSON.stringify(showcaseItems));
+}
+
+/**
+ * 탭 전환 함수
+ */
+function switchTab(tabName) {
+    // 현재 탭 갱신
+    currentTab = tabName;
+    
+    // 탭 버튼 활성화 상태 업데이트
+    const tabButtons = document.querySelectorAll('.tab-btn');
+    tabButtons.forEach(btn => {
+        if (btn.dataset.tab === tabName) {
+            btn.classList.add('active');
+        } else {
+            btn.classList.remove('active');
+        }
+    });
+    
+    // 탭 콘텐츠 표시 업데이트
+    const tabContents = document.querySelectorAll('.tab-content');
+    tabContents.forEach(content => {
+        if (content.id === tabName + 'Tab') {
+            content.classList.add('active');
+        } else {
+            content.classList.remove('active');
+        }
+    });
+    
+    // 탭에 따라 해당 콘텐츠 다시 로드
+    if (tabName === 'inventory') {
+        displayInventoryItems();
+    } else if (tabName === 'showcase') {
+        displayShowcaseItems();
+    }
 }
 
 /**
@@ -304,9 +379,9 @@ function closeSellModal() {
 }
 
 /**
- * 아이템 판매 확인
+ * 진열장에 등록
  */
-function confirmSell() {
+function addToShowcase() {
     if (!selectedItemForSell || !currentUser) return;
     
     const sellPrice = parseInt(document.getElementById('sellPrice').value);
@@ -315,32 +390,37 @@ function confirmSell() {
         return;
     }
     
-    // 거래소에 아이템 등록 (로컬 스토리지에 저장)
-    const marketItems = JSON.parse(localStorage.getItem('marketItems') || '[]');
+    // 현재 시간 처리
+    const now = new Date();
+    const registrationTime = now.getTime();
     
-    // 판매 아이템 정보 생성
-    const marketItem = {
+    // 판매 완료 시간 (현재 시간 + 5분)
+    const completionTime = new Date(now.getTime() + 5 * 60 * 1000).getTime();
+    
+    // 진열장 아이템 정보 생성
+    const showcaseItem = {
         ...selectedItemForSell,
-        seller: currentUser.username,
-        sellerNickname: currentUser.nickname || currentUser.username,
         price: sellPrice,
-        listingDate: new Date().toISOString()
+        registrationTime: registrationTime,
+        completionTime: completionTime,
+        isComplete: false
     };
     
-    // 거래소 아이템 목록에 추가
-    marketItems.push(marketItem);
-    localStorage.setItem('marketItems', JSON.stringify(marketItems));
+    // 진열장 아이템 목록에 추가
+    showcaseItems.push(showcaseItem);
+    saveShowcase();
     
     // 사용자 인벤토리에서 아이템 제거
     userInventory = userInventory.filter(item => item.id !== selectedItemForSell.id);
     saveInventory();
     
     // 알림 표시 및 모달 닫기
-    showNotification(`"${selectedItemForSell.name}" 아이템을 ${sellPrice.toLocaleString()} 골드에 거래소에 등록했습니다.`);
+    showNotification(`"${selectedItemForSell.name}" 아이템을 ${sellPrice.toLocaleString()} 골드에 진열장에 등록했습니다.`);
     closeSellModal();
     
-    // 인벤토리 화면 새로고침
-    displayInventoryItems();
+    // 진열장 탭으로 전환
+    switchTab('showcase');
+    displayShowcaseItems();
 }
 
 /**
@@ -380,14 +460,179 @@ function useItem(itemId) {
 }
 
 /**
+ * 진열장 아이템 표시
+ */
+function displayShowcaseItems() {
+    const showcaseContainer = document.getElementById('showcaseItems');
+    showcaseContainer.innerHTML = '';
+    
+    // 진열장이 비어있는 경우
+    if (showcaseItems.length === 0) {
+        showcaseContainer.innerHTML = `
+            <div class="empty-inventory">
+                <i class="fas fa-store"></i>
+                <h3>현재 진열중인 아이템이 없습니다</h3>
+                <p>창고에서 판매할 아이템을 진열장에 등록해보세요.</p>
+                <button class="btn" onclick="switchTab('inventory')">창고로 이동</button>
+            </div>
+        `;
+        return;
+    }
+    
+    // 현재 시간
+    const now = new Date().getTime();
+    
+    // 진열장 아이템 카드 생성
+    showcaseItems.forEach(item => {
+        const itemCard = document.createElement('div');
+        itemCard.className = 'item-card';
+        
+        // 아이템 희귀도 표시 색상 클래스
+        const rarityClass = `rarity-${item.rarity || 'common'}`;
+        const rarityText = getRarityText(item.rarity || 'common');
+        
+        // 판매 상태 확인
+        const isSaleComplete = now >= item.completionTime;
+        let saleStatusHtml = '';
+        let actionButtonHtml = '';
+        
+        if (!item.isComplete) {
+            if (isSaleComplete) {
+                saleStatusHtml = '<div class="sale-complete">판매 완료</div>';
+                actionButtonHtml = `<button class="btn-complete-sale" onclick="completeSale(${item.id})">판매금 획득</button>`;
+            } else {
+                // 남은 시간 계산
+                const remainingTime = Math.ceil((item.completionTime - now) / (1000 * 60));
+                saleStatusHtml = `
+                    <div class="sale-pending">판매 중</div>
+                    <div class="showcase-timer">남은 시간: ${remainingTime}분</div>
+                `;
+                actionButtonHtml = `<button class="btn-complete-sale" disabled>판매 진행중...</button>`;
+            }
+        } else {
+            saleStatusHtml = '<div class="sale-complete">판매 완료</div>';
+            actionButtonHtml = `<div class="item-value"><i class="fas fa-coins"></i> ${item.price.toLocaleString()} 골드 획득완료</div>`;
+        }
+        
+        // 아이템 통계 정보 생성
+        let statsHtml = '<div class="item-stats">';
+        for (const [key, value] of Object.entries(item.stats || {})) {
+            statsHtml += `<div class="item-stat"><span>${getStatName(key)}:</span> <span>${value}</span></div>`;
+        }
+        statsHtml += '</div>';
+        
+        // 아이템 카드 내용 설정
+        itemCard.innerHTML = `
+            <div class="item-image">
+                <img src="${item.image || 'img/default-item.png'}" alt="${item.name}">
+            </div>
+            <span class="item-rarity ${rarityClass}">${rarityText}</span>
+            <div class="item-content">
+                <div class="item-name">${item.name}</div>
+                <div class="item-description">${item.description}</div>
+                ${statsHtml}
+                <div class="item-value"><i class="fas fa-coins"></i> ${item.price.toLocaleString()} 골드</div>
+                ${saleStatusHtml}
+                <div class="item-action-buttons">
+                    ${actionButtonHtml}
+                    <button class="btn-details" onclick="viewItemDetails(${item.id}, true)">상세</button>
+                </div>
+            </div>
+        `;
+        
+        showcaseContainer.appendChild(itemCard);
+    });
+}
+
+/**
+ * 판매 완료 처리
+ */
+function completeSale(itemId) {
+    const item = showcaseItems.find(item => item.id === itemId);
+    if (!item || item.isComplete) return;
+    
+    // 판매 완료 상태로 변경
+    item.isComplete = true;
+    saveShowcase();
+    
+    // 사용자 금액 업데이트
+    let userGold = parseInt(localStorage.getItem(`gold_${currentUser.username}`) || '0');
+    userGold += item.price;
+    localStorage.setItem(`gold_${currentUser.username}`, userGold.toString());
+    
+    // 알림 표시
+    showNotification(`"${item.name}" 아이템 판매가 완료되어 ${item.price.toLocaleString()} 골드를 획득했습니다!`);
+    
+    // 진열장 다시 표시
+    displayShowcaseItems();
+}
+
+/**
  * 아이템 상세 정보 보기
  */
-function viewItemDetails(itemId) {
-    const item = userInventory.find(item => item.id === itemId);
+function viewItemDetails(itemId, isShowcase = false) {
+    // 진열장 또는 창고에서 아이템 가져오기
+    const item = isShowcase 
+        ? showcaseItems.find(item => item.id === itemId)
+        : userInventory.find(item => item.id === itemId);
+        
     if (!item) return;
     
-    // 상세 정보 모달 구현 (나중에 추가)
-    alert(`${item.name}\n\n${item.description}\n\n희귀도: ${getRarityText(item.rarity)}`);
+    // 상세 정보 모달 표시
+    const detailsModalBody = document.getElementById('detailsModalBody');
+    const detailsModal = document.getElementById('detailsModal');
+    
+    const rarityClass = `rarity-${item.rarity || 'common'}`;
+    const rarityText = getRarityText(item.rarity || 'common');
+    
+    // 아이템 통계 정보 생성
+    let statsHtml = '<div class="modal-item-stats">';
+    for (const [key, value] of Object.entries(item.stats || {})) {
+        statsHtml += `<div class="modal-item-stat"><span>${getStatName(key)}:</span> <span>${value}</span></div>`;
+    }
+    statsHtml += '</div>';
+    
+    // 모달에 아이템 정보 표시
+    detailsModalBody.innerHTML = `
+        <div class="modal-item-container">
+            <div class="modal-item-image">
+                <img src="${item.image || 'img/default-item.png'}" alt="${item.name}">
+            </div>
+            <div class="modal-item-info">
+                <div class="modal-item-name">${item.name}</div>
+                <span class="modal-item-rarity ${rarityClass}">${rarityText}</span>
+                <div class="modal-item-type">유형: ${getTypeName(item.type)}</div>
+                <div class="modal-item-description">${item.description}</div>
+                ${statsHtml}
+                <div class="modal-item-value"><i class="fas fa-coins"></i> 가치: ${item.value.toLocaleString()} 골드</div>
+                ${isShowcase ? `<div class="modal-item-price"><i class="fas fa-tag"></i> 판매가: ${item.price.toLocaleString()} 골드</div>` : ''}
+            </div>
+        </div>
+    `;
+    
+    detailsModal.style.display = 'block';
+}
+
+/**
+ * 상세 정보 모달 닫기
+ */
+function closeDetailsModal() {
+    const detailsModal = document.getElementById('detailsModal');
+    detailsModal.style.display = 'none';
+}
+
+/**
+ * 아이템 유형 이름 가져오기
+ */
+function getTypeName(type) {
+    const typeMap = {
+        weapon: '무기',
+        armor: '방어구',
+        accessory: '액세서리',
+        consumable: '소비 아이템'
+    };
+    
+    return typeMap[type] || type;
 }
 
 /**
