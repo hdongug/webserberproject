@@ -20,6 +20,9 @@
             --legendary-color: #ff9800;
             --mythic-color: #e91e63;
             --unique-color: #f44336;
+            --primary-purple: #6B46C1;
+            --light-purple: #8B5CF6;
+            --dark-purple: #553C9A;
         }
         
         body {
@@ -36,10 +39,14 @@
         }
         
         .header {
-            background-color: #333;
+            background: var(--primary-purple);
             color: white;
             padding: 20px;
+            box-shadow: 0 2px 10px rgba(107, 70, 193, 0.2);
             text-align: center;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
         }
         
         .market-header {
@@ -257,10 +264,6 @@
     <div class="container">
         <div class="market-header">
             <div class="market-title">아이템 마켓</div>
-            <div class="market-actions">
-                <button class="btn">내 아이템 판매</button>
-                <button class="btn">관심 상품</button>
-            </div>
         </div>
         
         <div class="filters">
