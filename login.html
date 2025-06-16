@@ -88,14 +88,26 @@
     <script src="js/common.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
+            console.log('로그인 페이지 로드됨');
+            
             // 로그인 폼 제출 처리
             const loginForm = document.getElementById('loginForm');
             if (loginForm) {
+                console.log('로그인 폼 요소 찾음');
+                
                 loginForm.addEventListener('submit', function(e) {
                     e.preventDefault();
+                    console.log('로그인 폼 제출됨');
                     
                     const username = document.getElementById('username').value;
                     const password = document.getElementById('password').value;
+                    console.log('입력된 사용자명:', username);
+                    
+                    // 입력값 검증
+                    if (!username || !password) {
+                        showError('아이디와 비밀번호를 모두 입력해주세요.');
+                        return;
+                    }
                     
                     // 로그인 버튼 비활성화 및 로딩 표시
                     const loginBtn = document.querySelector('.btn-login');
@@ -111,76 +123,132 @@
             function checkUserInDB(username, password, loginBtn) {
                 console.log('DB에서 사용자 정보 확인 중...');
                 
-                // DB에서 사용자 가져오기 (현재는 로컬스토리지 사용)
-                const users = JSON.parse(localStorage.getItem('users')) || [];
-                
-                // 사용자 이름과 비밀번호가 일치하는 사용자 찾기
-                const user = users.find(u => u.username === username && u.password === password);
-                
-                if (user) {
-                    // 토큰 정보 가져오기
-                    const tokens = JSON.parse(localStorage.getItem('tokens')) || {};
+                try {
+                    // DB에서 사용자 가져오기 (현재는 로컬스토리지 사용)
+                    const usersData = localStorage.getItem('users');
+                    console.log('사용자 DB 데이터:', usersData ? '있음' : '없음');
                     
-                    // 사용자의 토큰이 없거나 만료된 경우 새 토큰 생성
-                    if (!tokens[username]) {
-                        const newToken = btoa(username + ':' + Date.now());
-                        tokens[username] = newToken;
-                        localStorage.setItem('tokens', JSON.stringify(tokens));
-                        user.token = newToken;
+                    const users = usersData ? JSON.parse(usersData) : [];
+                    console.log('등록된 사용자 수:', users.length);
+                    
+                    // 사용자 이름과 비밀번호가 일치하는 사용자 찾기
+                    const user = users.find(u => u.username === username && u.password === password);
+                    
+                    if (user) {
+                        console.log('일치하는 사용자 찾음:', user.username);
+                        
+                        // 토큰 정보 가져오기
+                        const tokensData = localStorage.getItem('tokens');
+                        const tokens = tokensData ? JSON.parse(tokensData) : {};
+                        
+                        // 사용자의 토큰이 없거나 만료된 경우 새 토큰 생성
+                        if (!tokens[username]) {
+                            const newToken = btoa(username + ':' + Date.now());
+                            tokens[username] = newToken;
+                            localStorage.setItem('tokens', JSON.stringify(tokens));
+                            user.token = newToken;
+                            console.log('새 토큰 생성함');
+                        } else {
+                            user.token = tokens[username];
+                            console.log('기존 토큰 사용');
+                        }
+                        
+                        // 로그인 성공 처리
+                        loginSuccess(user);
+                    } else {
+                        console.log('일치하는 사용자가 없음');
+                        // 로그인 실패 처리
+                        loginBtn.disabled = false;
+                        loginBtn.textContent = '로그인';
+                        
+                        // 오류 메시지 표시
+                        showError('아이디 또는 비밀번호가 일치하지 않습니다.');
                     }
-                    
-                    // 로그인 성공 처리
-                    loginSuccess(user);
-                } else {
-                    // 로그인 실패 처리
+                } catch (error) {
+                    console.error('로그인 처리 중 오류:', error);
                     loginBtn.disabled = false;
                     loginBtn.textContent = '로그인';
-                    
-                    // 오류 메시지 표시
-                    showError('아이디 또는 비밀번호가 일치하지 않습니다.');
+                    showError('로그인 처리 중 오류가 발생했습니다.');
                 }
             }
             
             // 사용자 로그인 성공 처리 함수
             function loginSuccess(user) {
-                // 로그인 성공 메시지 표시
-                const successMessage = document.getElementById('successMessage');
-                successMessage.style.display = 'block';
-                successMessage.querySelector('span').textContent = '로그인에 성공했습니다!';
+                console.log('로그인 성공 처리 시작:', user.username);
                 
-                // 로그인 상태 저장 (로컬 스토리지와 세션 스토리지 모두 사용)
-                localStorage.setItem('isLoggedIn', 'true');
-                localStorage.setItem('userNickname', user.nickname || user.username);
-                localStorage.setItem('currentUser', JSON.stringify({
-                    username: user.username,
-                    nickname: user.nickname,
-                    gender: user.gender,
-                    id: user.id,
-                    token: user.token
-                }));
-                
-                // 세션 스토리지에도 로그인 정보 저장
-                sessionStorage.setItem('currentUser', JSON.stringify({
-                    username: user.username,
-                    nickname: user.nickname,
-                    gender: user.gender,
-                    id: user.id,
-                    token: user.token
-                }));
-                
-                console.log('DB 확인 로그인 성공:', user.username);
-                
-                // 1초 후 홈으로 이동
-                setTimeout(() => {
-                    window.location.href = 'index.html';
-                }, 1000);
+                try {
+                    // 로그인 성공 메시지 표시
+                    const successMessage = document.getElementById('successMessage');
+                    if (successMessage) {
+                        successMessage.style.display = 'block';
+                        const messageSpan = successMessage.querySelector('span');
+                        if (messageSpan) {
+                            messageSpan.textContent = '로그인에 성공했습니다!';
+                        }
+                    }
+                    
+                    // 오류 메시지 숨김
+                    const errorMessage = document.getElementById('errorMessage');
+                    if (errorMessage) {
+                        errorMessage.style.display = 'none';
+                    }
+                    
+                    // 로그인 상태 저장 (로컬 스토리지와 세션 스토리지 모두 사용)
+                    const userData = {
+                        username: user.username,
+                        nickname: user.nickname || user.username,
+                        gender: user.gender || '',
+                        id: user.id || Date.now(),
+                        token: user.token
+                    };
+                    
+                    localStorage.setItem('isLoggedIn', 'true');
+                    localStorage.setItem('userNickname', userData.nickname);
+                    localStorage.setItem('currentUser', JSON.stringify(userData));
+                    
+                    console.log('로컬스토리지에 사용자 정보 저장 완료');
+                    
+                    // 세션 스토리지에도 로그인 정보 저장
+                    sessionStorage.setItem('currentUser', JSON.stringify(userData));
+                    
+                    console.log('세션스토리지에 사용자 정보 저장 완료');
+                    
+                    console.log('DB 확인 로그인 성공:', user.username);
+                    console.log('1초 후 홈페이지로 이동 예정');
+                    
+                    // 1초 후 홈으로 이동
+                    setTimeout(function() {
+                        console.log('홈페이지로 이동 시도');
+                        window.location.href = 'index.html';
+                    }, 1000);
+                } catch (error) {
+                    console.error('로그인 성공 처리 중 오류:', error);
+                    // 오류가 발생해도 홈으로 이동시키려고 시도
+                    setTimeout(function() {
+                        window.location.href = 'index.html';
+                    }, 1000);
+                }
             }
             
             // 오류 메시지 표시 함수
             function showError(message) {
+                console.log('에러 메시지 표시:', message);
                 const errorMessage = document.getElementById('errorMessage');
-                errorMessage.style.display = 'block';
-                errorMessage.querySelector('span').textContent = message;
+                if (errorMessage) {
+                    errorMessage.style.display = 'block';
+                    const messageSpan = errorMessage.querySelector('span');
+                    if (messageSpan) {
+                        messageSpan.textContent = message;
+                    } else {
+                        errorMessage.innerHTML = `<i class="fas fa-exclamation-circle"></i><span>${message}</span>`;
+                    }
+                    
+                    // 성공 메시지 숨김
+                    const successMessage = document.getElementById('successMessage');
+                    if (successMessage) {
+                        successMessage.style.display = 'none';
+                    }
+                }
             }
             
         });

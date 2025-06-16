@@ -233,15 +233,21 @@
     <script src="js/common.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/js/all.min.js"></script>
     <script>
+        // 페이지가 완전히 로드된 후 실행
         document.addEventListener('DOMContentLoaded', function() {
+            console.log('회원가입 페이지 로드됨');
+            
             // 회원가입 폼 제출 처리
             const registerForm = document.getElementById('registerForm');
             const passwordInput = document.getElementById('password');
             const confirmPasswordInput = document.getElementById('confirmPassword');
             
             if (registerForm) {
+                console.log('회원가입 폼 요소 찾음');
+                
                 registerForm.addEventListener('submit', function(e) {
                     e.preventDefault();
+                    console.log('회원가입 폼 제출됨');
                     
                     // 진행 중임을 표시
                     const submitBtn = document.getElementById('registerBtn');
@@ -252,6 +258,8 @@
                     const password = passwordInput.value;
                     const confirmPassword = confirmPasswordInput.value;
                     const nickname = document.getElementById('nickname').value;
+                    
+                    console.log('입력값 확인:', { username, nickname });
                     
                     // 간단한 폼 유효성 검사
                     if (!username || !password || !confirmPassword || !nickname) {
@@ -268,80 +276,125 @@
                         return;
                     }
                     
-                    // 이메일 검사는 제거됨 (더 이상 이메일 필드가 없음)
-                    
-                    // 임시 저장 (로컬스토리지 사용, 실제로는 서버에 저장)
-                    const users = JSON.parse(localStorage.getItem('users')) || [];
-                    
-                    // 중복 아이디 검사
-                    if (users.some(user => user.username === username)) {
-                        showError('이미 사용 중인 아이디입니다.');
+                    try {
+                        // 임시 저장 (로컬스토리지 사용, 실제로는 서버에 저장)
+                        const users = JSON.parse(localStorage.getItem('users')) || [];
+                        console.log('기존 사용자 수:', users.length);
+                        
+                        // 중복 아이디 검사
+                        if (users.some(user => user.username === username)) {
+                            showError('이미 사용 중인 아이디입니다.');
+                            submitBtn.textContent = '회원가입';
+                            submitBtn.disabled = false;
+                            return;
+                        }
+                        
+                        // 회원 정보 저장
+                        const newUser = {
+                            username: username,
+                            password: password,
+                            nickname: nickname,
+                            gender: document.querySelector('input[name="gender"]:checked')?.value || '',
+                            registeredAt: new Date().toISOString()
+                        };
+                        
+                        console.log('새 사용자 정보:', newUser);
+                        
+                        // 서버에 사용자 정보 저장 (현재는 DB 역할을 하는 로컬스토리지 사용)
+                        saveUserToDB(newUser);
+                        
+                        // 성공 메시지 표시
+                        const successMessage = document.getElementById('successMessage');
+                        successMessage.style.display = 'block';
+                        successMessage.querySelector('span').textContent = '회원가입이 완료되었습니다. 로그인을 하세요.';
+                        
+                        // 에러 메시지 숨김
+                        document.getElementById('errorMessage').style.display = 'none';
+                        
+                        // 폼 초기화
+                        registerForm.reset();
+                        submitBtn.textContent = '회원가입 완료!';
+                        
+                        console.log('2초 후 로그인 페이지로 이동 예정');
+                        
+                        // 2초 후 로그인 페이지로 이동
+                        setTimeout(function() {
+                            console.log('로그인 페이지로 이동 시도');
+                            window.location.href = 'login.html';
+                        }, 2000);
+                        
+                    } catch (error) {
+                        console.error('회원가입 처리 중 오류 발생:', error);
+                        showError('회원가입 처리 중 오류가 발생했습니다. 다시 시도해주세요.');
                         submitBtn.textContent = '회원가입';
                         submitBtn.disabled = false;
-                        return;
                     }
-                    
-                    // 이메일 중복 검사는 제거됨 (더 이상 이메일 필드가 없음)
-                    
-                    // 회원 정보 저장
-                    const newUser = {
-                        username: username,
-                        password: password,
-                        nickname: nickname,
-                        gender: document.querySelector('input[name="gender"]:checked')?.value || '',
-                        registeredAt: new Date().toISOString()
-                    };
-                    
-                    // 서버에 사용자 정보 저장 (현재는 DB 역할을 하는 로컬스토리지 사용)
-                    saveUserToDB(newUser);
-                    
-                    // 성공 메시지 표시
-                    const successMessage = document.getElementById('successMessage');
-                    successMessage.style.display = 'block';
-                    successMessage.querySelector('span').textContent = '회원가입이 완료되었습니다. 로그인을 하세요.';
-                    
-                    // 폼 초기화
-                    registerForm.reset();
-                    
-                    // 2초 후 로그인 페이지로 이동
-                    setTimeout(() => {
-                        window.location.href = 'login.html';
-                    }, 2000);
                 });
+            } else {
+                console.error('회원가입 폼을 찾을 수 없음');
             }
             
             // DB에 사용자 정보를 저장하는 함수 (현재는 로컬스토리지를 DB로 사용)
             function saveUserToDB(user) {
-                // 회원정보를 가져와서 새 회원 추가
-                const users = JSON.parse(localStorage.getItem('users')) || [];
-                
-                // 회원정보에 고유 ID 부여 (실제 DB에서는 auto-increment 되는 필드)
-                user.id = Date.now();
-                user.createdAt = new Date().toISOString();
-                
-                // 사용자 정보 저장
-                users.push(user);
-                
-                // 회원정보를 DB에 저장 (현재는 로컬스토리지 사용)
-                localStorage.setItem('users', JSON.stringify(users));
-                
-                console.log('DB에 사용자 정보 저장 완료:', user.username);
-                
-                // 토큰 생성 (실제로는 서버에서 JWT 등을 생성하여 관리)
-                const token = btoa(user.username + ':' + Date.now());
-                user.token = token;
-                
-                // 토큰 정보 저장 (실제로는 서버에서 관리)
-                const tokens = JSON.parse(localStorage.getItem('tokens')) || {};
-                tokens[user.username] = token;
-                localStorage.setItem('tokens', JSON.stringify(tokens));
+                try {
+                    console.log('DB 저장 시작');
+                    // 회원정보를 가져와서 새 회원 추가
+                    let users = [];
+                    try {
+                        const usersData = localStorage.getItem('users');
+                        users = usersData ? JSON.parse(usersData) : [];
+                    } catch (e) {
+                        console.error('기존 회원 정보 파싱 오류:', e);
+                        users = [];
+                    }
+                    
+                    // 회원정보에 고유 ID 부여 (실제 DB에서는 auto-increment 되는 필드)
+                    user.id = Date.now();
+                    user.createdAt = new Date().toISOString();
+                    
+                    // 사용자 정보 저장
+                    users.push(user);
+                    
+                    // 회원정보를 DB에 저장 (현재는 로컬스토리지 사용)
+                    localStorage.setItem('users', JSON.stringify(users));
+                    
+                    console.log('DB에 사용자 정보 저장 완료:', user.username);
+                    
+                    // 토큰 생성 (실제로는 서버에서 JWT 등을 생성하여 관리)
+                    const token = btoa(user.username + ':' + Date.now());
+                    user.token = token;
+                    
+                    // 토큰 정보 저장 (실제로는 서버에서 관리)
+                    const tokens = JSON.parse(localStorage.getItem('tokens')) || {};
+                    tokens[user.username] = token;
+                    localStorage.setItem('tokens', JSON.stringify(tokens));
+                    
+                    console.log('토큰 저장 완료');
+                    
+                    // 로컬스토리지 저장 검증
+                    const savedUsers = JSON.parse(localStorage.getItem('users'));
+                    console.log('저장된 사용자 수:', savedUsers ? savedUsers.length : 0);
+                    
+                    return true;
+                } catch (error) {
+                    console.error('DB 저장 중 오류 발생:', error);
+                    return false;
+                }
             }
             
             // 에러 메시지 표시 함수
             function showError(message) {
+                console.log('에러 메시지 표시:', message);
                 const errorMessage = document.getElementById('errorMessage');
-                errorMessage.style.display = 'block';
-                errorMessage.querySelector('span').textContent = message;
+                if (errorMessage) {
+                    errorMessage.style.display = 'block';
+                    const messageSpan = errorMessage.querySelector('span');
+                    if (messageSpan) {
+                        messageSpan.textContent = message;
+                    } else {
+                        errorMessage.innerHTML = `<i class="fas fa-exclamation-circle"></i><span>${message}</span>`;
+                    }
+                }
             }
             
             // 비밀번호 확인
