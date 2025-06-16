@@ -231,11 +231,13 @@
         <ul class="sidebar-menu">
             <li><a href="index.html"><i class="fas fa-home"></i> 홈</a></li>
             <li><a href="market.html"><i class="fas fa-store"></i> 거래소</a></li>
-            <li><a href="inventory.html"><i class="fas fa-box"></i> 창고</a></li>
-            <li><a href="board.html" class="active"><i class="fas fa-clipboard-list"></i> 게시판</a></li>
             <li><a href="attendance.html"><i class="fas fa-calendar-check"></i> 출석체크</a></li>
-            <li><a href="login.html"><i class="fas fa-sign-in-alt"></i> 로그인</a></li>
-            <li><a href="register.html"><i class="fas fa-user-plus"></i> 회원가입</a></li>
+            <li><a href="board.html" class="active"><i class="fas fa-clipboard-list"></i> 게시판</a></li>
+            <li class="logged-in-only"><a href="inventory.html"><i class="fas fa-warehouse"></i> 창고</a></li>
+            <li class="logged-in-only"><a href="profile.html"><i class="fas fa-user"></i> 프로필</a></li>
+            <li class="logged-in-only"><a href="#" onclick="logout(); return false;"><i class="fas fa-sign-out-alt"></i> 로그아웃</a></li>
+            <li class="logged-out-only"><a href="login.html"><i class="fas fa-sign-in-alt"></i> 로그인</a></li>
+            <li class="logged-out-only"><a href="register.html"><i class="fas fa-user-plus"></i> 회원가입</a></li>
         </ul>
     </div>
 

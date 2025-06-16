@@ -125,10 +125,12 @@
         <a href="index.html" class="menu-item">홈</a>
         <a href="attendance.html" class="menu-item">출석체크</a>
         <a href="market.html" class="menu-item">거래소</a>
-        <a href="profile.html" class="menu-item">프로필</a>
-        <a href="community_board.html" class="menu-item">게시판</a>
-        <a href="login.html" class="menu-item">로그인</a>
-        <a href="register.html" class="menu-item">회원가입</a>
+        <a href="board.html" class="menu-item">게시판</a>
+        <a href="inventory.html" class="menu-item logged-in-only"><i class="fas fa-warehouse"></i> 창고</a>
+        <a href="profile.html" class="menu-item logged-in-only">프로필</a>
+        <a href="login.html" class="menu-item logged-out-only">로그인</a>
+        <a href="register.html" class="menu-item logged-out-only">회원가입</a>
+        <a href="#" class="menu-item logged-in-only" onclick="logout(); return false;">로그아웃</a>
     </div>
 
     <!-- 회원가입 컨테이너 -->
