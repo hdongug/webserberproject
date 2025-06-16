@@ -82,6 +82,19 @@ function updateSideMenuByLoginStatus(isLoggedIn) {
     const sideMenu = document.querySelector('.side-menu');
     if (!sideMenu) return;
     
+    // 클래스 기반 메뉴 아이템 제어
+    const loggedInOnlyItems = document.querySelectorAll('.logged-in-only');
+    const loggedOutOnlyItems = document.querySelectorAll('.logged-out-only');
+    
+    // 로그인 상태에 따른 표시 설정
+    loggedInOnlyItems.forEach(item => {
+        item.style.display = isLoggedIn ? 'block' : 'none';
+    });
+    
+    loggedOutOnlyItems.forEach(item => {
+        item.style.display = isLoggedIn ? 'none' : 'block';
+    });
+    
     // 프로필 메뉴 아이템 찾기
     const profileMenuItem = sideMenu.querySelector('a[href="profile.html"]');
     // 로그인/회원가입 메뉴 아이템 찾기
@@ -112,15 +125,15 @@ function updateSideMenuByLoginStatus(isLoggedIn) {
     // 로그인 상태에 따라 메뉴 표시/숨김 설정
     if (isLoggedIn) {
         // 로그인 상태
-        if (profileMenuItem) profileMenuItem.style.display = 'block';
-        if (loginMenuItem) loginMenuItem.style.display = 'none';
-        if (registerMenuItem) registerMenuItem.style.display = 'none';
+        if (profileMenuItem && !profileMenuItem.classList.contains('logged-in-only')) profileMenuItem.style.display = 'block';
+        if (loginMenuItem && !loginMenuItem.classList.contains('logged-out-only')) loginMenuItem.style.display = 'none';
+        if (registerMenuItem && !registerMenuItem.classList.contains('logged-out-only')) registerMenuItem.style.display = 'none';
         if (logoutMenuItem) logoutMenuItem.style.display = 'block';
     } else {
         // 비로그인 상태
-        if (profileMenuItem) profileMenuItem.style.display = 'none';
-        if (loginMenuItem) loginMenuItem.style.display = 'block';
-        if (registerMenuItem) registerMenuItem.style.display = 'block';
+        if (profileMenuItem && !profileMenuItem.classList.contains('logged-in-only')) profileMenuItem.style.display = 'none';
+        if (loginMenuItem && !loginMenuItem.classList.contains('logged-out-only')) loginMenuItem.style.display = 'block';
+        if (registerMenuItem && !registerMenuItem.classList.contains('logged-out-only')) registerMenuItem.style.display = 'block';
         if (logoutMenuItem) logoutMenuItem.style.display = 'none';
     }
 }
