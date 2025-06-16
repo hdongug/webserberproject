@@ -165,6 +165,17 @@
             color: white;
         }
         
+        .btn-cancel {
+            background-color: #FF9800;
+            color: white;
+        }
+        
+        .btn-search {
+            background-color: #2196F3;
+            color: white;
+            margin-left: 5px;
+        }
+        
         .btn-accept:hover {
             background-color: #3e8e41;
         }
@@ -175,6 +186,30 @@
         
         .btn-add:hover {
             background-color: #1976d2;
+        }
+        
+        .btn-cancel:hover {
+            background-color: #e68a00;
+        }
+        
+        .btn-search:hover {
+            background-color: #1976d2;
+        }
+        
+        .search-container {
+            display: flex;
+            margin-bottom: 15px;
+        }
+        
+        .search-results {
+            margin-top: 15px;
+        }
+        
+        .no-results {
+            text-align: center;
+            color: #666;
+            font-style: italic;
+            padding: 20px 0;
         }
         
         #friendSearch {
@@ -261,94 +296,571 @@
             </div>
             
             <div class="tab-content" id="requests">
-                <div class="friend-list">
-                    <div class="friend-card">
-                        <div class="friend-avatar">송</div>
-                        <div class="friend-name">송민호</div>
-                        <div class="friend-actions">
-                            <button class="btn-sm btn-accept">수락</button>
-                            <button class="btn-sm btn-decline">거절</button>
-                        </div>
-                    </div>
-                    <div class="friend-card">
-                        <div class="friend-avatar">한</div>
-                        <div class="friend-name">한소희</div>
-                        <div class="friend-actions">
-                            <button class="btn-sm btn-accept">수락</button>
-                            <button class="btn-sm btn-decline">거절</button>
-                        </div>
-                    </div>
+                <div class="friend-list" id="friendRequests">
+                    <!-- 받은 친구 요청이 여기에 표시됩니다 -->
+                    <p class="no-results">받은 친구 요청이 없습니다.</p>
                 </div>
             </div>
             
             <div class="tab-content" id="pending">
-                <div class="friend-list">
-                    <div class="friend-card">
-                        <div class="friend-avatar">윤</div>
-                        <div class="friend-name">윤석열</div>
-                        <div class="friend-status">대기 중</div>
-                    </div>
-                    <div class="friend-card">
-                        <div class="friend-avatar">문</div>
-                        <div class="friend-name">문재인</div>
-                        <div class="friend-status">대기 중</div>
-                    </div>
+                <div class="friend-list" id="pendingFriends">
+                    <!-- 대기 중인 친구 요청이 여기에 표시됩니다 -->
+                    <p class="no-results">보낸 친구 요청이 없습니다.</p>
                 </div>
             </div>
             
             <div class="tab-content" id="add">
-                <input type="text" id="friendSearch" placeholder="친구 이름 검색...">
-                <div class="friend-list">
-                    <div class="friend-card">
-                        <div class="friend-avatar">오</div>
-                        <div class="friend-name">오세훈</div>
-                        <div class="friend-actions">
-                            <button class="btn-sm btn-add">친구 추가</button>
-                        </div>
-                    </div>
-                    <div class="friend-card">
-                        <div class="friend-avatar">안</div>
-                        <div class="friend-name">안철수</div>
-                        <div class="friend-actions">
-                            <button class="btn-sm btn-add">친구 추가</button>
-                        </div>
-                    </div>
-                    <div class="friend-card">
-                        <div class="friend-avatar">유</div>
-                        <div class="friend-name">유재석</div>
-                        <div class="friend-actions">
-                            <button class="btn-sm btn-add">친구 추가</button>
-                        </div>
-                    </div>
+                <div class="search-container">
+                    <input type="text" id="friendSearch" placeholder="친구 닉네임으로 검색...">
+                    <button id="searchButton" class="btn-sm btn-search">검색</button>
+                </div>
+                <div class="search-results" id="searchResults">
+                    <!-- 검색 결과가 여기에 표시됩니다 -->
+                    <p class="no-results">검색 결과가 여기에 표시됩니다.</p>
                 </div>
             </div>
         </div>
     </div>
     
     <div class="notification" id="notification"></div>
+    
+    <!-- 확인 대화상자 -->
+    <div id="confirmDialog" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>친구 요청</h3>
+                <span class="close">&times;</span>
+            </div>
+            <div class="modal-body">
+                <p id="confirmMessage"></p>
+            </div>
+            <div class="modal-footer">
+                <button id="confirmYes" class="btn-sm btn-accept">예</button>
+                <button id="confirmNo" class="btn-sm btn-decline">아니요</button>
+            </div>
+        </div>
+    </div>
+    
+    <style>
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+            overflow: auto;
+        }
+        
+        .modal-content {
+            background-color: #fff;
+            margin: 15% auto;
+            padding: 0;
+            width: 350px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+            border-radius: 5px;
+            animation: modalopen 0.3s;
+        }
+        
+        @keyframes modalopen {
+            from {opacity: 0; transform: translateY(-50px)}
+            to {opacity: 1; transform: translateY(0)}
+        }
+        
+        .modal-header {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-top-left-radius: 5px;
+            border-top-right-radius: 5px;
+        }
+        
+        .modal-header h3 {
+            margin: 0;
+            font-size: 18px;
+        }
+        
+        .close {
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        
+        .modal-body {
+            padding: 20px 15px;
+        }
+        
+        .modal-footer {
+            padding: 10px 15px 15px;
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+        }
+    </style>
 
     <script src="js/common.js"></script>
     <script>
         // 사용자의 프로필 데이터를 가져오는 함수 (없으면 초기화)
         function getUserProfileData(username) {
-            // localStorage에서 프로필 데이터 가져오기
             const allProfiles = JSON.parse(localStorage.getItem('userProfiles')) || {};
             
-            // 해당 유저의 프로필이 없으면 초기화
             if (!allProfiles[username]) {
-                // 신규 회원의 경우 초기 프로필 데이터 생성
                 allProfiles[username] = {
-                    money: 0,         // 초기 재화
-                    items: 0,         // 초기 아이템 수
-                    trades: 0,        // 초기 거래 횟수
-                    friends: []       // 초기 친구 목록
+                    money: 0,
+                    items: 0,
+                    trades: 0,
+                    friends: [],
+                    friendRequests: [],
+                    pendingRequests: []
                 };
-                
-                // 업데이트된 프로필 정보 저장
                 localStorage.setItem('userProfiles', JSON.stringify(allProfiles));
             }
             
+            if (!allProfiles[username].friendRequests) allProfiles[username].friendRequests = [];
+            if (!allProfiles[username].pendingRequests) allProfiles[username].pendingRequests = [];
+            localStorage.setItem('userProfiles', JSON.stringify(allProfiles));
+            
             return allProfiles[username];
+        }
+        
+        // 전체 사용자 목록을 가져오는 함수
+        function getAllUsers() {
+            const allUsers = JSON.parse(localStorage.getItem('allUsers')) || [];
+            const registeredUsers = JSON.parse(localStorage.getItem('registeredUsers')) || {};
+            
+            // 등록된 사용자가 있고 allUsers가 비어있으면 목록 생성
+            if (Object.keys(registeredUsers).length > 0 && allUsers.length === 0) {
+                for (const username in registeredUsers) {
+                    allUsers.push({
+                        username: username,
+                        nickname: registeredUsers[username].nickname || username
+                    });
+                }
+                localStorage.setItem('allUsers', JSON.stringify(allUsers));
+            }
+            
+            return allUsers;
+        }
+        
+        // 모달 관련 함수
+        function openConfirmDialog(message, callback) {
+            const modal = document.getElementById('confirmDialog');
+            const confirmMessage = document.getElementById('confirmMessage');
+            const confirmYes = document.getElementById('confirmYes');
+            const confirmNo = document.getElementById('confirmNo');
+            const closeBtn = document.querySelector('.close');
+            
+            confirmMessage.textContent = message;
+            modal.style.display = 'block';
+            
+            // 예 버튼 클릭 시
+            confirmYes.onclick = function() {
+                modal.style.display = 'none';
+                if (callback) callback(true);
+            };
+            
+            // 아니요 버튼 클릭 시
+            confirmNo.onclick = function() {
+                modal.style.display = 'none';
+                if (callback) callback(false);
+            };
+            
+            // X 버튼 클릭 시
+            closeBtn.onclick = function() {
+                modal.style.display = 'none';
+                if (callback) callback(false);
+            };
+            
+            // 모달 바깥 영역 클릭 시
+            window.onclick = function(event) {
+                if (event.target === modal) {
+                    modal.style.display = 'none';
+                    if (callback) callback(false);
+                }
+            };
+        }
+        
+        // 사용자 검색 및 결과 표시 함수
+        function searchUsers(query) {
+            const allUsers = getAllUsers();
+            const currentUser = localStorage.getItem('currentUser');
+            const userProfile = getUserProfileData(currentUser);
+            
+            // 닉네임이나 사용자 이름으로 검색
+            const results = allUsers.filter(user => {
+                // 현재 로그인한 사용자 제외
+                if (user.username === currentUser) return false;
+                
+                // 이미 친구인 사용자 제외
+                if (userProfile.friends.includes(user.username)) return false;
+                
+                // 이미 친구 요청을 보낸 사용자 제외
+                if (userProfile.pendingRequests.includes(user.username)) return false;
+                
+                // 닉네임이나 사용자이름에 검색어가 포함되어 있는지 확인
+                return user.nickname.toLowerCase().includes(query.toLowerCase()) || 
+                       user.username.toLowerCase().includes(query.toLowerCase());
+            });
+            
+            return results;
+        }
+        
+        // 검색 결과 화면에 표시
+        function displaySearchResults(results) {
+            const searchResults = document.getElementById('searchResults');
+            searchResults.innerHTML = '';
+            
+            if (results.length === 0) {
+                searchResults.innerHTML = '<p class="no-results">검색 결과가 없습니다.</p>';
+                return;
+            }
+            
+            results.forEach(user => {
+                // 친구 카드 생성
+                const friendCard = document.createElement('div');
+                friendCard.className = 'friend-card';
+                
+                // 친구 아바타 생성 (처음 문자 사용)
+                const friendAvatar = document.createElement('div');
+                friendAvatar.className = 'friend-avatar';
+                friendAvatar.textContent = user.nickname.charAt(0);
+                
+                // 친구 이름 생성
+                const friendName = document.createElement('div');
+                friendName.className = 'friend-name';
+                friendName.textContent = user.nickname;
+                
+                // 친구 추가 버튼 생성
+                const friendActions = document.createElement('div');
+                friendActions.className = 'friend-actions';
+                
+                const addButton = document.createElement('button');
+                addButton.className = 'btn-sm btn-add';
+                addButton.textContent = '친구 요청';
+                addButton.dataset.username = user.username;
+                addButton.onclick = function() {
+                    sendFriendRequest(user.username, user.nickname);
+                };
+                
+                // 구성요소 조립
+                friendActions.appendChild(addButton);
+                friendCard.appendChild(friendAvatar);
+                friendCard.appendChild(friendName);
+                friendCard.appendChild(friendActions);
+                searchResults.appendChild(friendCard);
+            });
+        }
+        
+        // 친구 요청 보내기
+        function sendFriendRequest(username, nickname) {
+            const currentUser = localStorage.getItem('currentUser');
+            const confirmMessage = `${nickname} 사용자에게 친구 요청을 보낼까요?`;
+            
+            openConfirmDialog(confirmMessage, function(confirmed) {
+                if (confirmed) {
+                    // 친구 요청 처리
+                    const allProfiles = JSON.parse(localStorage.getItem('userProfiles')) || {};
+                    
+                    // 보낸 사람(현재 사용자) 프로필에 pendingRequests 추가
+                    if (!allProfiles[currentUser].pendingRequests.includes(username)) {
+                        allProfiles[currentUser].pendingRequests.push(username);
+                    }
+                    
+                    // 받는 사람 프로필에 friendRequests 추가
+                    if (!allProfiles[username]) {
+                        // 해당 유저 프로필이 없으면 생성
+                        allProfiles[username] = {
+                            money: 0,
+                            items: 0,
+                            trades: 0,
+                            friends: [],
+                            friendRequests: [currentUser],
+                            pendingRequests: []
+                        };
+                    } else if (!allProfiles[username].friendRequests) {
+                        // friendRequests 필드가 없으면 추가
+                        allProfiles[username].friendRequests = [currentUser];
+                    } else if (!allProfiles[username].friendRequests.includes(currentUser)) {
+                        // 이미 요청이 있는지 확인
+                        allProfiles[username].friendRequests.push(currentUser);
+                    }
+                    
+                    // 변경사항 저장
+                    localStorage.setItem('userProfiles', JSON.stringify(allProfiles));
+                    
+                    // 화면 업데이트
+                    showNotification('친구 요청을 보냈습니다.');
+                    loadPendingFriends(); // 대기 친구 목록 업데이트
+                    
+                    // 검색 결과에서 해당 사용자 제거
+                    const searchInput = document.getElementById('friendSearch');
+                    const results = searchUsers(searchInput.value);
+                    displaySearchResults(results);
+                }
+            });
+        }
+        
+        // 알림 표시 함수
+        function showNotification(message) {
+            const notification = document.getElementById('notification');
+            notification.textContent = message;
+            notification.style.display = 'block';
+            
+            setTimeout(() => {
+                notification.style.display = 'none';
+            }, 3000);
+        }
+        
+        // 친구 수 업데이트 함수
+        function updateFriendCount(count) {
+            const friendCountElement = document.querySelector('.stat-card:nth-child(4) .stat-value');
+            friendCountElement.textContent = `${count} 명`;
+        }
+        
+        // 친구 목록 불러오기
+        function loadFriends() {
+            const currentUser = localStorage.getItem('currentUser');
+            const userProfile = getUserProfileData(currentUser);
+            const friendsList = document.getElementById('friends');
+            const friendListContainer = friendsList.querySelector('.friend-list');
+            
+            // 기존 목록 초기화
+            friendListContainer.innerHTML = '';
+            
+            if (!userProfile.friends || userProfile.friends.length === 0) {
+                friendListContainer.innerHTML = '<p class="no-results">친구가 없습니다.</p>';
+                return;
+            }
+            
+            // 등록된 사용자 정보 가져오기
+            const registeredUsers = JSON.parse(localStorage.getItem('registeredUsers')) || {};
+            
+            // 친구 목록 표시
+            userProfile.friends.forEach(friend => {
+                const nickname = (registeredUsers[friend] && registeredUsers[friend].nickname) || friend;
+                
+                const friendCard = document.createElement('div');
+                friendCard.className = 'friend-card';
+                
+                const friendAvatar = document.createElement('div');
+                friendAvatar.className = 'friend-avatar';
+                friendAvatar.textContent = nickname.charAt(0);
+                
+                const friendName = document.createElement('div');
+                friendName.className = 'friend-name';
+                friendName.textContent = nickname;
+                
+                friendCard.appendChild(friendAvatar);
+                friendCard.appendChild(friendName);
+                friendListContainer.appendChild(friendCard);
+            });
+        }
+        
+        // 친구 요청 목록 불러오기
+        function loadFriendRequests() {
+            const currentUser = localStorage.getItem('currentUser');
+            const userProfile = getUserProfileData(currentUser);
+            const requestsList = document.getElementById('friendRequests');
+            
+            // 기존 목록 초기화
+            requestsList.innerHTML = '';
+            
+            if (!userProfile.friendRequests || userProfile.friendRequests.length === 0) {
+                requestsList.innerHTML = '<p class="no-results">받은 친구 요청이 없습니다.</p>';
+                return;
+            }
+            
+            // 등록된 사용자 정보 가져오기
+            const registeredUsers = JSON.parse(localStorage.getItem('registeredUsers')) || {};
+            
+            // 친구 요청 목록 표시
+            userProfile.friendRequests.forEach(requester => {
+                const nickname = (registeredUsers[requester] && registeredUsers[requester].nickname) || requester;
+                
+                const requestCard = document.createElement('div');
+                requestCard.className = 'friend-card';
+                requestCard.dataset.username = requester;
+                
+                const friendAvatar = document.createElement('div');
+                friendAvatar.className = 'friend-avatar';
+                friendAvatar.textContent = nickname.charAt(0);
+                
+                const friendName = document.createElement('div');
+                friendName.className = 'friend-name';
+                friendName.textContent = nickname;
+                
+                const friendActions = document.createElement('div');
+                friendActions.className = 'friend-actions';
+                
+                const acceptButton = document.createElement('button');
+                acceptButton.className = 'btn-sm btn-accept';
+                acceptButton.textContent = '수락';
+                acceptButton.onclick = function() {
+                    acceptFriendRequest(requester, nickname);
+                };
+                
+                const declineButton = document.createElement('button');
+                declineButton.className = 'btn-sm btn-decline';
+                declineButton.textContent = '거절';
+                declineButton.onclick = function() {
+                    declineFriendRequest(requester, nickname);
+                };
+                
+                friendActions.appendChild(acceptButton);
+                friendActions.appendChild(declineButton);
+                
+                requestCard.appendChild(friendAvatar);
+                requestCard.appendChild(friendName);
+                requestCard.appendChild(friendActions);
+                
+                requestsList.appendChild(requestCard);
+            });
+        }
+        
+        // 대기 중인 친구 요청 불러오기
+        function loadPendingFriends() {
+            const currentUser = localStorage.getItem('currentUser');
+            const userProfile = getUserProfileData(currentUser);
+            const pendingList = document.getElementById('pendingFriends');
+            
+            // 기존 목록 초기화
+            pendingList.innerHTML = '';
+            
+            if (!userProfile.pendingRequests || userProfile.pendingRequests.length === 0) {
+                pendingList.innerHTML = '<p class="no-results">보낸 친구 요청이 없습니다.</p>';
+                return;
+            }
+            
+            // 등록된 사용자 정보 가져오기
+            const registeredUsers = JSON.parse(localStorage.getItem('registeredUsers')) || {};
+            
+            // 대기 중인 친구 요청 표시
+            userProfile.pendingRequests.forEach(recipient => {
+                const nickname = (registeredUsers[recipient] && registeredUsers[recipient].nickname) || recipient;
+                
+                const pendingCard = document.createElement('div');
+                pendingCard.className = 'friend-card';
+                pendingCard.dataset.username = recipient;
+                
+                const friendAvatar = document.createElement('div');
+                friendAvatar.className = 'friend-avatar';
+                friendAvatar.textContent = nickname.charAt(0);
+                
+                const friendName = document.createElement('div');
+                friendName.className = 'friend-name';
+                friendName.textContent = nickname;
+                
+                const cancelButton = document.createElement('button');
+                cancelButton.className = 'btn-sm btn-cancel';
+                cancelButton.textContent = '취소';
+                cancelButton.onclick = function() {
+                    cancelFriendRequest(recipient, nickname);
+                };
+                
+                pendingCard.appendChild(friendAvatar);
+                pendingCard.appendChild(friendName);
+                pendingCard.appendChild(cancelButton);
+                
+                pendingList.appendChild(pendingCard);
+            });
+        }
+        
+        // 친구 요청 수락 함수
+        function acceptFriendRequest(username, nickname) {
+            const currentUser = localStorage.getItem('currentUser');
+            const allProfiles = JSON.parse(localStorage.getItem('userProfiles')) || {};
+            
+            // 현재 사용자 프로필 업데이트
+            if (!allProfiles[currentUser].friends.includes(username)) {
+                allProfiles[currentUser].friends.push(username);
+            }
+            
+            // friendRequests 배열에서 해당 사용자 제거
+            const index = allProfiles[currentUser].friendRequests.indexOf(username);
+            if (index !== -1) {
+                allProfiles[currentUser].friendRequests.splice(index, 1);
+            }
+            
+            // 요청을 보낸 사용자의 프로필 업데이트
+            if (allProfiles[username]) {
+                if (!allProfiles[username].friends.includes(currentUser)) {
+                    allProfiles[username].friends.push(currentUser);
+                }
+                
+                // pendingRequests 배열에서 현재 사용자 제거
+                const pendingIndex = allProfiles[username].pendingRequests.indexOf(currentUser);
+                if (pendingIndex !== -1) {
+                    allProfiles[username].pendingRequests.splice(pendingIndex, 1);
+                }
+            }
+            
+            // 변경사항 저장
+            localStorage.setItem('userProfiles', JSON.stringify(allProfiles));
+            
+            // 화면 업데이트
+            showNotification(`${nickname} 님의 친구 요청을 수락했습니다.`);
+            loadFriends();
+            loadFriendRequests();
+            updateFriendCount(allProfiles[currentUser].friends.length);
+        }
+        
+        // 친구 요청 거절 함수
+        function declineFriendRequest(username, nickname) {
+            const currentUser = localStorage.getItem('currentUser');
+            const allProfiles = JSON.parse(localStorage.getItem('userProfiles')) || {};
+            
+            // friendRequests 배열에서 해당 사용자 제거
+            const index = allProfiles[currentUser].friendRequests.indexOf(username);
+            if (index !== -1) {
+                allProfiles[currentUser].friendRequests.splice(index, 1);
+            }
+            
+            // 요청을 보낸 사용자의 프로필 업데이트
+            if (allProfiles[username]) {
+                const pendingIndex = allProfiles[username].pendingRequests.indexOf(currentUser);
+                if (pendingIndex !== -1) {
+                    allProfiles[username].pendingRequests.splice(pendingIndex, 1);
+                }
+            }
+            
+            // 변경사항 저장
+            localStorage.setItem('userProfiles', JSON.stringify(allProfiles));
+            
+            // 화면 업데이트
+            showNotification(`${nickname} 님의 친구 요청을 거절했습니다.`);
+            loadFriendRequests();
+        }
+        
+        // 친구 요청 취소 함수
+        function cancelFriendRequest(username, nickname) {
+            const currentUser = localStorage.getItem('currentUser');
+            const allProfiles = JSON.parse(localStorage.getItem('userProfiles')) || {};
+            
+            // pendingRequests 배열에서 해당 사용자 제거
+            const index = allProfiles[currentUser].pendingRequests.indexOf(username);
+            if (index !== -1) {
+                allProfiles[currentUser].pendingRequests.splice(index, 1);
+            }
+            
+            // 요청을 받은 사용자의 프로필 업데이트
+            if (allProfiles[username]) {
+                const requestIndex = allProfiles[username].friendRequests.indexOf(currentUser);
+                if (requestIndex !== -1) {
+                    allProfiles[username].friendRequests.splice(requestIndex, 1);
+                }
+            }
+            
+            // 변경사항 저장
+            localStorage.setItem('userProfiles', JSON.stringify(allProfiles));
+            
+            // 화면 업데이트
+            showNotification(`${nickname} 님에게 보낸 친구 요청을 취소했습니다.`);
+            loadPendingFriends();
         }
         
         document.addEventListener('DOMContentLoaded', function() {
@@ -361,29 +873,30 @@
                 return;
             }
             
-            // common.js의 로그인 상태 확인 함수 호출
-            checkLoginStatus();
-            
-            // 현재 로그인한 사용자 정보 가져오기
-            const userData = JSON.parse(currentUser);
-            
-            // 사용자의 프로필 데이터 가져오기 (없으면 초기화)
-            const userProfile = getUserProfileData(userData.username);
-            
-            // 프로필 기본 정보 설정
-            document.querySelector('.profile-name').textContent = userData.nickname || userData.username;
-            document.querySelector('.profile-avatar').textContent = (userData.nickname || userData.username).charAt(0);
-            
-            // 가입일 표시 - 실제 가입일 기준으로 표시
-            const registeredDate = new Date(userData.registeredAt || userData.createdAt);
-            const formattedDate = `${registeredDate.getFullYear()}년 ${registeredDate.getMonth() + 1}월 ${registeredDate.getDate()}일`;
-            document.querySelector('.profile-info p').textContent = `가입일: ${formattedDate}`;
+            // 프로필 데이터 가져오기
+            const userProfile = getUserProfileData(currentUser);
             
             // 프로필 통계 정보 업데이트
             document.querySelector('.stat-card:nth-child(1) .stat-value').textContent = `${userProfile.money.toLocaleString()} 원`;
             document.querySelector('.stat-card:nth-child(2) .stat-value').textContent = `${userProfile.items} 개`;
             document.querySelector('.stat-card:nth-child(3) .stat-value').textContent = `${userProfile.trades} 회`;
             document.querySelector('.stat-card:nth-child(4) .stat-value').textContent = `${userProfile.friends.length} 명`;
+            
+            // 등록 일자 표시
+            const regDate = document.getElementById('regDate');
+            const currentDate = new Date();
+            const formattedDate = `${currentDate.getFullYear()}-${String(currentDate.getMonth() + 1).padStart(2, '0')}-${String(currentDate.getDate()).padStart(2, '0')}`;
+            regDate.textContent = formattedDate;
+            
+            // 초기 창 활성화
+            document.querySelector('.tab[data-tab="friends"]').classList.add('active');
+            document.getElementById('friends').classList.add('active');
+            
+            // 친구 관련 데이터 로드
+            loadFriends();
+            loadFriendRequests();
+            loadPendingFriends();
+            
             // 탭 전환 기능
             const tabs = document.querySelectorAll('.tab');
             const tabContents = document.querySelectorAll('.tab-content');
@@ -402,110 +915,175 @@
                 });
             });
             
-            // 친구 요청 수락/거절 기능
-            const acceptButtons = document.querySelectorAll('.btn-accept');
-            const declineButtons = document.querySelectorAll('.btn-decline');
-            const addButtons = document.querySelectorAll('.btn-add');
-            
-            acceptButtons.forEach(button => {
-                button.addEventListener('click', function() {
-                    const friendCard = this.closest('.friend-card');
-                    const friendName = friendCard.querySelector('.friend-name').textContent;
-                    showNotification(`${friendName}님의 친구 요청을 수락했습니다.`);
-                    
-                    // 친구 목록으로 이동
-                    const friendsList = document.getElementById('friends').querySelector('.friend-list');
-                    const newFriendCard = document.createElement('div');
-                    newFriendCard.className = 'friend-card';
-                    newFriendCard.innerHTML = `
-                        <div class="friend-avatar">${friendName.charAt(0)}</div>
-                        <div class="friend-name">${friendName}</div>
-                    `;
-                    friendsList.appendChild(newFriendCard);
-                    
-                    // 요청 목록에서 제거
-                    friendCard.remove();
-                    
-                    // 친구 수 업데이트
-                    updateFriendCount(1);
-                });
-            });
-            
-            declineButtons.forEach(button => {
-                button.addEventListener('click', function() {
-                    const friendCard = this.closest('.friend-card');
-                    const friendName = friendCard.querySelector('.friend-name').textContent;
-                    showNotification(`${friendName}님의 친구 요청을 거절했습니다.`);
-                    
-                    // 요청 목록에서 제거
-                    friendCard.remove();
-                });
-            });
-            
-            addButtons.forEach(button => {
-                button.addEventListener('click', function() {
-                    const friendCard = this.closest('.friend-card');
-                    const friendName = friendCard.querySelector('.friend-name').textContent;
-                    showNotification(`${friendName}님에게 친구 요청을 보냈습니다.`);
-                    
-                    // 친구 추가 버튼 비활성화 및 텍스트 변경
-                    this.disabled = true;
-                    this.textContent = '요청됨';
-                    this.classList.remove('btn-add');
-                    this.classList.add('btn-add-disabled');
-                    
-                    // 대기 중인 친구 목록에 추가
-                    const pendingList = document.getElementById('pending').querySelector('.friend-list');
-                    const newPendingCard = document.createElement('div');
-                    newPendingCard.className = 'friend-card';
-                    newPendingCard.innerHTML = `
-                        <div class="friend-avatar">${friendName.charAt(0)}</div>
-                        <div class="friend-name">${friendName}</div>
-                        <div class="friend-status">대기 중</div>
-                    `;
-                    pendingList.appendChild(newPendingCard);
-                });
-            });
-            
-            // 친구 검색 기능
-            const friendSearch = document.getElementById('friendSearch');
-            friendSearch.addEventListener('input', function() {
-                const searchValue = this.value.toLowerCase();
-                const friendCards = document.querySelectorAll('#add .friend-card');
+            // 검색 버튼 클릭 이벤트
+            document.getElementById('searchButton').addEventListener('click', function() {
+                const searchInput = document.getElementById('friendSearch');
+                const query = searchInput.value.trim();
                 
-                friendCards.forEach(card => {
-                    const name = card.querySelector('.friend-name').textContent.toLowerCase();
-                    if (name.includes(searchValue)) {
-                        card.style.display = 'flex';
-                    } else {
-                        card.style.display = 'none';
+                if (query.length > 0) {
+                    const results = searchUsers(query);
+                    displaySearchResults(results);
+                } else {
+                    showNotification('검색할 닉네임을 입력해주세요.');
+                }
+            });
+            
+            // 검색창 엔터키 이벤트
+            document.getElementById('friendSearch').addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    document.getElementById('searchButton').click();
+                }
+            });
+            
+            // 사용자 검색 함수 구현
+            function searchUsers(query) {
+                const currentUser = localStorage.getItem('currentUser');
+                const userProfile = getUserProfileData(currentUser);
+                const registeredUsers = JSON.parse(localStorage.getItem('registeredUsers')) || {};
+                const results = [];
+                
+                // 등록된 모든 사용자를 처리
+                for (const username in registeredUsers) {
+                    // 현재 사용자 제외
+                    if (username === currentUser) continue;
+                    
+                    // 이미 친구인 사용자 제외
+                    if (userProfile.friends.includes(username)) continue;
+                    
+                    // 이미 친구 요청을 보낸 사용자 제외
+                    if (userProfile.pendingRequests.includes(username)) continue;
+                    
+                    const user = registeredUsers[username];
+                    const nickname = user.nickname || username;
+                    
+                    // 검색어와 닉네임 또는 아이디 일치 여부 확인
+                    if (nickname.toLowerCase().includes(query.toLowerCase()) || 
+                        username.toLowerCase().includes(query.toLowerCase())) {
+                        results.push({
+                            username: username,
+                            nickname: nickname
+                        });
                     }
-                });
-            });
-            
-            // 알림 표시 함수
-            function showNotification(message) {
-                const notification = document.getElementById('notification');
-                notification.textContent = message;
-                notification.style.display = 'block';
+                }
                 
-                setTimeout(() => {
-                    notification.style.display = 'none';
-                }, 3000);
+                return results;
             }
             
-            // 친구 수 업데이트 함수
-            function updateFriendCount(change) {
-                const friendCountElement = document.querySelector('.stat-card:nth-child(4) .stat-value');
-                let currentCount = parseInt(friendCountElement.textContent);
-                currentCount += change;
-                friendCountElement.textContent = `${currentCount} 명`;
+            // 검색 결과 표시 함수
+            function displaySearchResults(results) {
+                const searchResultsContainer = document.getElementById('searchResults');
+                searchResultsContainer.innerHTML = '';
+                
+                if (results.length === 0) {
+                    searchResultsContainer.innerHTML = '<p class="no-results">검색 결과가 없습니다.</p>';
+                    return;
+                }
+                
+                results.forEach(user => {
+                    const resultCard = document.createElement('div');
+                    resultCard.className = 'friend-card';
+                    resultCard.dataset.username = user.username;
+                    
+                    const userAvatar = document.createElement('div');
+                    userAvatar.className = 'friend-avatar';
+                    userAvatar.textContent = user.nickname.charAt(0);
+                    
+                    const userName = document.createElement('div');
+                    userName.className = 'friend-name';
+                    userName.textContent = user.nickname;
+                    
+                    const addButton = document.createElement('button');
+                    addButton.className = 'btn-sm btn-add';
+                    addButton.textContent = '친구 요청';
+                    addButton.onclick = function() {
+                        showConfirmModal(user.username, user.nickname);
+                    };
+                    
+                    resultCard.appendChild(userAvatar);
+                    resultCard.appendChild(userName);
+                    resultCard.appendChild(addButton);
+                    
+                    searchResultsContainer.appendChild(resultCard);
+                });
+                
+                // 검색 결과가 있으면 탭 변경
+                document.querySelector('.tab[data-tab="searchTab"]').click();
             }
             
-            // 현재 날짜를 표시
-            const now = new Date();
-            const options = { year: 'numeric', month: 'long', day: 'numeric' };
-            document.getElementById('registrationDate').textContent = now.toLocaleDateString('ko-KR', options);
+            // 확인 모달 표시 함수
+            function showConfirmModal(username, nickname) {
+                const modal = document.getElementById('friendModal');
+                const modalMessage = document.getElementById('modalMessage');
+                const confirmButton = document.getElementById('confirmButton');
+                const cancelButton = document.getElementById('cancelButton');
+                
+                modalMessage.textContent = `${nickname} 님에게 친구 요청을 보낼까요?`;
+                modal.style.display = 'flex';
+                
+                // 이전 이벤트 리스너 제거
+                const newConfirmButton = confirmButton.cloneNode(true);
+                const newCancelButton = cancelButton.cloneNode(true);
+                confirmButton.parentNode.replaceChild(newConfirmButton, confirmButton);
+                cancelButton.parentNode.replaceChild(newCancelButton, cancelButton);
+                
+                // 새 이벤트 리스너 추가
+                newConfirmButton.addEventListener('click', function() {
+                    sendFriendRequest(username, nickname);
+                    modal.style.display = 'none';
+                });
+                
+                newCancelButton.addEventListener('click', function() {
+                    modal.style.display = 'none';
+                });
+            }
+            
+            // 친구 요청 보내기
+            function sendFriendRequest(username, nickname) {
+                const currentUser = localStorage.getItem('currentUser');
+                const allProfiles = JSON.parse(localStorage.getItem('userProfiles')) || {};
+                
+                // 자신의 프로필에 대기 등록
+                if (!allProfiles[currentUser].pendingRequests.includes(username)) {
+                    allProfiles[currentUser].pendingRequests.push(username);
+                }
+                
+                // 상대방 프로필에 요청 등록
+                if (!allProfiles[username]) {
+                    // 대상 사용자 프로필이 없는 경우 생성
+                    allProfiles[username] = {
+                        money: 0,
+                        items: 0,
+                        trades: 0,
+                        friends: [],
+                        friendRequests: [],
+                        pendingRequests: []
+                    };
+                }
+                
+                if (!allProfiles[username].friendRequests.includes(currentUser)) {
+                    allProfiles[username].friendRequests.push(currentUser);
+                }
+                
+                // 변경사항 저장
+                localStorage.setItem('userProfiles', JSON.stringify(allProfiles));
+                
+                // 화면 업데이트
+                showNotification(`${nickname} 님에게 친구 요청을 보냈습니다.`);
+                loadPendingFriends();
+                
+                // 검색 결과에서 해당 카드 업데이트
+                const searchResultCard = document.querySelector(`.friend-card[data-username="${username}"]`);
+                if (searchResultCard) {
+                    const addButton = searchResultCard.querySelector('.btn-add');
+                    addButton.disabled = true;
+                    addButton.textContent = '요청됨';
+                    addButton.classList.remove('btn-add');
+                    addButton.classList.add('btn-add-disabled');
+                }
+            }
+            
+            // 초기 데이터 로드 완료 알림
+            showNotification('프로필 페이지가 로드되었습니다.');
             
             /* 실시간 친구 요청 시뮬레이션 제거 */
             /*setTimeout(() => {
