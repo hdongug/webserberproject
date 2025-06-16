@@ -187,6 +187,19 @@
                     </div>
                 </div>
                 
+                <!-- 이메일 입력란 -->
+                <div class="form-group form-row">
+                    <label for="email" class="form-label">이메일 :</label>
+                    <div class="form-input-wrap">
+                        <input type="email" 
+                               id="email" 
+                               name="email" 
+                               placeholder="이메일" 
+                               required 
+                               class="form-control" />
+                    </div>
+                </div>
+                
                 <!-- 닉네임 입력란 -->
                 <div class="form-group form-row">
                     <label for="nickname" class="form-label">닉네임 :</label>
@@ -218,7 +231,7 @@
                 <div class="form-group form-row">
                     <label class="form-label"></label>
                     <div class="form-input-wrap">
-                        <button type="submit" class="btn btn-register">회원가입</button>
+                        <button type="submit" id="registerBtn" class="btn btn-register">회원가입</button>
                     </div>
                 </div>
                 
@@ -234,23 +247,36 @@
         document.addEventListener('DOMContentLoaded', function() {
             // 회원가입 폼 제출 처리
             const registerForm = document.getElementById('registerForm');
+            const passwordInput = document.getElementById('password');
+            const confirmPasswordInput = document.getElementById('confirmPassword');
+            
             if (registerForm) {
                 registerForm.addEventListener('submit', function(e) {
                     e.preventDefault();
                     
+                    // 진행 중임을 표시
+                    const submitBtn = document.getElementById('registerBtn');
+                    submitBtn.textContent = '가입 중...';
+                    submitBtn.disabled = true;
+                    
                     const username = document.getElementById('username').value;
                     const email = document.getElementById('email').value;
-                    const password = document.getElementById('password').value;
-                    const confirmPassword = document.getElementById('confirmPassword').value;
+                    const password = passwordInput.value;
+                    const confirmPassword = confirmPasswordInput.value;
+                    const nickname = document.getElementById('nickname').value;
                     
                     // 간단한 폼 유효성 검사
-                    if (!username || !email || !password || !confirmPassword) {
+                    if (!username || !email || !password || !confirmPassword || !nickname) {
                         showError('모든 필수 항목을 입력해주세요.');
+                        submitBtn.textContent = '회원가입';
+                        submitBtn.disabled = false;
                         return;
                     }
                     
                     if (password !== confirmPassword) {
                         showError('비밀번호와 비밀번호 확인이 일치하지 않습니다.');
+                        submitBtn.textContent = '회원가입';
+                        submitBtn.disabled = false;
                         return;
                     }
                     
@@ -258,6 +284,8 @@
                     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
                     if (!emailRegex.test(email)) {
                         showError('올바른 이메일 형식이 아닙니다.');
+                        submitBtn.textContent = '회원가입';
+                        submitBtn.disabled = false;
                         return;
                     }
                     
@@ -267,12 +295,16 @@
                     // 중복 아이디 검사
                     if (users.some(user => user.username === username)) {
                         showError('이미 사용 중인 아이디입니다.');
+                        submitBtn.textContent = '회원가입';
+                        submitBtn.disabled = false;
                         return;
                     }
                     
                     // 중복 이메일 검사
                     if (users.some(user => user.email === email)) {
                         showError('이미 사용 중인 이메일입니다.');
+                        submitBtn.textContent = '회원가입';
+                        submitBtn.disabled = false;
                         return;
                     }
                     
@@ -281,7 +313,8 @@
                         username: username,
                         email: email,
                         password: password,
-                        name: document.getElementById('name')?.value || '',
+                        nickname: nickname,
+                        gender: document.querySelector('input[name="gender"]:checked')?.value || '',
                         registeredAt: new Date().toISOString()
                     };
                     
@@ -309,75 +342,20 @@
                 errorMessage.style.display = 'block';
                 errorMessage.querySelector('span').textContent = message;
             }
-        });
-    </script>
-    
-    <script>
-        // 비밀번호 강도 체크
-        document.getElementById('password').addEventListener('input', function() {
-            const password = this.value;
-            const strengthDiv = document.getElementById('passwordStrength');
             
-            if (password.length === 0) {
-                strengthDiv.textContent = '';
-                return;
+            // 비밀번호 확인
+            if (confirmPasswordInput) {
+                confirmPasswordInput.addEventListener('input', function() {
+                    const password = passwordInput.value;
+                    const confirmPassword = this.value;
+                    
+                    if (confirmPassword && password !== confirmPassword) {
+                        this.setCustomValidity('비밀번호가 일치하지 않습니다.');
+                    } else {
+                        this.setCustomValidity('');
+                    }
+                });
             }
-            
-            let strength = 0;
-            if (password.length >= 8) strength++;
-            if (/[a-z]/.test(password)) strength++;
-            if (/[A-Z]/.test(password)) strength++;
-            if (/[0-9]/.test(password)) strength++;
-            if (/[^A-Za-z0-9]/.test(password)) strength++;
-            
-            if (strength < 3) {
-                strengthDiv.textContent = '약함';
-                strengthDiv.className = 'password-strength strength-weak';
-            } else if (strength < 4) {
-                strengthDiv.textContent = '보통';
-                strengthDiv.className = 'password-strength strength-medium';
-            } else {
-                strengthDiv.textContent = '강함';
-                strengthDiv.className = 'password-strength strength-strong';
-            }
-        });
-        
-        // 비밀번호 확인
-        document.getElementById('confirmPassword').addEventListener('input', function() {
-            const password = document.getElementById('password').value;
-            const confirmPassword = this.value;
-            
-            if (confirmPassword && password !== confirmPassword) {
-                this.setCustomValidity('비밀번호가 일치하지 않습니다.');
-            } else {
-                this.setCustomValidity('');
-            }
-        });
-        
-        // 전체 동의 체크박스
-        function toggleAllTerms() {
-            const agreeAll = document.getElementById('agreeAll');
-            const terms = ['agreeTerms', 'agreePrivacy', 'agreeMarketing'];
-            
-            terms.forEach(termId => {
-                document.getElementById(termId).checked = agreeAll.checked;
-            });
-        }
-        
-        // 개별 약관 체크 시 전체 동의 상태 업데이트
-        ['agreeTerms', 'agreePrivacy', 'agreeMarketing'].forEach(termId => {
-            document.getElementById(termId).addEventListener('change', function() {
-                const allChecked = ['agreeTerms', 'agreePrivacy', 'agreeMarketing']
-                    .every(id => document.getElementById(id).checked);
-                document.getElementById('agreeAll').checked = allChecked;
-            });
-        });
-        
-        // 폼 제출 처리
-        document.getElementById('registerForm').addEventListener('submit', function(e) {
-            const submitBtn = document.getElementById('registerBtn');
-            submitBtn.textContent = '가입 중...';
-            submitBtn.disabled = true;
         });
     </script>
 </body>

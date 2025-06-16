@@ -15,7 +15,8 @@ import java.util.Map;
 import java.util.concurrent.Executors;
 
 public class SimpleWebServer {
-    private static final int PORT = 8080;
+    // Render에서 사용하는 환경 변수 PORT를 확인하고, 없으면 8080을 기본값으로 사용
+    private static final int PORT = Integer.parseInt(System.getenv("PORT") != null ? System.getenv("PORT") : "8080");
     private static final String PROJECT_PATH = ".";
 
     public static void main(String[] args) throws IOException {
