@@ -34,12 +34,6 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // 로그인 상태 확인 및 UI 업데이트
     checkLoginStatus();
-    
-    // 추천 아이템 갱신 타이머 (30분마다)
-    if (document.querySelector('.recommended-items')) {
-        updateRecommendedItems();
-        setInterval(updateRecommendedItems, 30 * 60 * 1000); // 30분마다 갱신
-    }
 });
 
 // 로그인 상태 확인 및 UI 업데이트
@@ -115,59 +109,4 @@ function logout() {
     window.location.href = 'index.html';
 }
 
-// 추천 아이템 갱신 함수
-function updateRecommendedItems() {
-    const recommendedItemsContainer = document.querySelector('.recommended-items-list');
-    if (!recommendedItemsContainer) return;
-    
-    // 실제로는 서버에서 데이터를 가져와야 하지만, 템플릿으로 대체
-    const timestamp = new Date().toLocaleTimeString();
-    // 랜덤 아이템 추가
-    const allItems = [
-        { id: 1, name: '강화된 마법 검', price: '25,000', image: 'https://via.placeholder.com/100x100?text=Item1' },
-        { id: 2, name: '전설 방패', price: '120,000', image: 'https://via.placeholder.com/100x100?text=Item2' },
-        { id: 3, name: '영웅의 반지', price: '45,000', image: 'https://via.placeholder.com/100x100?text=Item3' },
-        { id: 4, name: '스피드 부츠', price: '38,000', image: 'https://via.placeholder.com/100x100?text=Item4' },
-        { id: 5, name: '드래곤 갑옷', price: '85,000', image: 'https://via.placeholder.com/100x100?text=Item5' },
-        { id: 6, name: '불궁포', price: '65,000', image: 'https://via.placeholder.com/100x100?text=Item6' },
-        { id: 7, name: '중력 하는 마법서', price: '50,000', image: 'https://via.placeholder.com/100x100?text=Item7' },
-        { id: 8, name: '무한의 화살', price: '15,000', image: 'https://via.placeholder.com/100x100?text=Item8' },
-    ];
-    
-    // 랜덤하게 4개만 선택
-    const items = [];
-    const usedIndices = new Set();
-    
-    while (items.length < 4 && usedIndices.size < allItems.length) {
-        const randomIndex = Math.floor(Math.random() * allItems.length);
-        
-        if (!usedIndices.has(randomIndex)) {
-            usedIndices.add(randomIndex);
-            items.push(allItems[randomIndex]);
-        }
-    }
-    
-    // 현재 시간을 표시하여 갱신 시간을 보여줌
-    const now = new Date();
-    const timeString = `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}`;
-    
-    document.querySelector('.refresh-time').textContent = `${timeString} 갱신됨`;
-    
-    // 추천 아이템 목록 업데이트
-    let html = '';
-    dummyItems.forEach(item => {
-        html += `
-            <div class="item">
-                <div class="item-image">
-                    <img src="${item.image || 'img/default-item.png'}" alt="${item.name}">
-                </div>
-                <div class="item-info">
-                    <h4>${item.name}</h4>
-                    <p class="item-price">${item.price.toLocaleString()}원</p>
-                </div>
-            </div>
-        `;
-    });
-    
-    recommendedItemsContainer.innerHTML = html;
-}
+

@@ -292,35 +292,49 @@
                         registeredAt: new Date().toISOString()
                     };
                     
-                    // 서버에 사용자 정보를 저장하는 함수
-                    saveUserToServer(newUser);
-                    
-                    // 로컬스토리지에도 저장 (백업 용도)
-                    users.push(newUser);
-                    localStorage.setItem('users', JSON.stringify(users));
+                    // 서버에 사용자 정보 저장 (현재는 DB 역할을 하는 로컬스토리지 사용)
+                    saveUserToDB(newUser);
                     
                     // 성공 메시지 표시
                     const successMessage = document.getElementById('successMessage');
                     successMessage.style.display = 'block';
-                    successMessage.querySelector('span').textContent = '회원가입에 성공했습니다! 로그인 페이지로 이동합니다.';
+                    successMessage.querySelector('span').textContent = '회원가입이 완료되었습니다. 로그인을 하세요.';
                     
                     // 폼 초기화
                     registerForm.reset();
                     
-                    // 바로 로그인 페이지로 이동
-                    window.location.href = 'login.html';
+                    // 2초 후 로그인 페이지로 이동
+                    setTimeout(() => {
+                        window.location.href = 'login.html';
+                    }, 2000);
                 });
             }
             
-            // 서버에 사용자 정보를 저장하는 함수
-            function saveUserToServer(user) {
-                // 서버에 회원정보 저장 로직 (현재는 로컬스토리지만 사용)
-                // 실제 서버 구현 시 이 부분을 수정하여 서버 API를 호출하면 됨
-                console.log('서버에 사용자 정보 저장:', user);
+            // DB에 사용자 정보를 저장하는 함수 (현재는 로컬스토리지를 DB로 사용)
+            function saveUserToDB(user) {
+                // 회원정보를 가져와서 새 회원 추가
+                const users = JSON.parse(localStorage.getItem('users')) || [];
                 
-                // 사용자 정보를 세션에 저장하여 로그인 상태 유지 (실제로는 서버에서 세션/토큰 관리)
-                sessionStorage.setItem('currentUser', JSON.stringify(user));}
-                });
+                // 회원정보에 고유 ID 부여 (실제 DB에서는 auto-increment 되는 필드)
+                user.id = Date.now();
+                user.createdAt = new Date().toISOString();
+                
+                // 사용자 정보 저장
+                users.push(user);
+                
+                // 회원정보를 DB에 저장 (현재는 로컬스토리지 사용)
+                localStorage.setItem('users', JSON.stringify(users));
+                
+                console.log('DB에 사용자 정보 저장 완료:', user.username);
+                
+                // 토큰 생성 (실제로는 서버에서 JWT 등을 생성하여 관리)
+                const token = btoa(user.username + ':' + Date.now());
+                user.token = token;
+                
+                // 토큰 정보 저장 (실제로는 서버에서 관리)
+                const tokens = JSON.parse(localStorage.getItem('tokens')) || {};
+                tokens[user.username] = token;
+                localStorage.setItem('tokens', JSON.stringify(tokens));
             }
             
             // 에러 메시지 표시 함수
