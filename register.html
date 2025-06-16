@@ -249,13 +249,12 @@
                     submitBtn.disabled = true;
                     
                     const username = document.getElementById('username').value;
-                    const email = document.getElementById('email').value;
                     const password = passwordInput.value;
                     const confirmPassword = confirmPasswordInput.value;
                     const nickname = document.getElementById('nickname').value;
                     
                     // 간단한 폼 유효성 검사
-                    if (!username || !email || !password || !confirmPassword || !nickname) {
+                    if (!username || !password || !confirmPassword || !nickname) {
                         showError('모든 필수 항목을 입력해주세요.');
                         submitBtn.textContent = '회원가입';
                         submitBtn.disabled = false;
@@ -269,14 +268,7 @@
                         return;
                     }
                     
-                    // 이메일 형식 검사
-                    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-                    if (!emailRegex.test(email)) {
-                        showError('올바른 이메일 형식이 아닙니다.');
-                        submitBtn.textContent = '회원가입';
-                        submitBtn.disabled = false;
-                        return;
-                    }
+                    // 이메일 검사는 제거됨 (더 이상 이메일 필드가 없음)
                     
                     // 임시 저장 (로컬스토리지 사용, 실제로는 서버에 저장)
                     const users = JSON.parse(localStorage.getItem('users')) || [];
@@ -289,39 +281,45 @@
                         return;
                     }
                     
-                    // 중복 이메일 검사
-                    if (users.some(user => user.email === email)) {
-                        showError('이미 사용 중인 이메일입니다.');
-                        submitBtn.textContent = '회원가입';
-                        submitBtn.disabled = false;
-                        return;
-                    }
+                    // 이메일 중복 검사는 제거됨 (더 이상 이메일 필드가 없음)
                     
                     // 회원 정보 저장
                     const newUser = {
                         username: username,
-                        email: email,
                         password: password,
                         nickname: nickname,
                         gender: document.querySelector('input[name="gender"]:checked')?.value || '',
                         registeredAt: new Date().toISOString()
                     };
                     
+                    // 서버에 사용자 정보를 저장하는 함수
+                    saveUserToServer(newUser);
+                    
+                    // 로컬스토리지에도 저장 (백업 용도)
                     users.push(newUser);
                     localStorage.setItem('users', JSON.stringify(users));
                     
                     // 성공 메시지 표시
                     const successMessage = document.getElementById('successMessage');
                     successMessage.style.display = 'block';
-                    successMessage.querySelector('span').textContent = '회원가입에 성공했습니다! 잠시 후 로그인 페이지로 이동합니다.';
+                    successMessage.querySelector('span').textContent = '회원가입에 성공했습니다! 로그인 페이지로 이동합니다.';
                     
                     // 폼 초기화
                     registerForm.reset();
                     
-                    // 3초 후 로그인 페이지로 이동
-                    setTimeout(() => {
-                        window.location.href = 'login.html';
-                    }, 3000);
+                    // 바로 로그인 페이지로 이동
+                    window.location.href = 'login.html';
+                });
+            }
+            
+            // 서버에 사용자 정보를 저장하는 함수
+            function saveUserToServer(user) {
+                // 서버에 회원정보 저장 로직 (현재는 로컬스토리지만 사용)
+                // 실제 서버 구현 시 이 부분을 수정하여 서버 API를 호출하면 됨
+                console.log('서버에 사용자 정보 저장:', user);
+                
+                // 사용자 정보를 세션에 저장하여 로그인 상태 유지 (실제로는 서버에서 세션/토큰 관리)
+                sessionStorage.setItem('currentUser', JSON.stringify(user));}
                 });
             }
             

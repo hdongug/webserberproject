@@ -97,37 +97,69 @@
                     const username = document.getElementById('username').value;
                     const password = document.getElementById('password').value;
                     
-                    // 임시로 로컬스토리지에서 사용자 정보 확인 (실제로는 서버에서 처리)
+                    // 로그인 버튼 비활성화 및 로딩 표시
+                    const loginBtn = document.querySelector('.btn-login');
+                    loginBtn.disabled = true;
+                    loginBtn.textContent = '로그인 중...';
+                    
+                    // 서버에서 사용자 정보 확인 (현재는 로컬스토리지에서 처리)
                     const users = JSON.parse(localStorage.getItem('users')) || [];
                     const user = users.find(u => u.username === username && u.password === password);
                     
                     if (user) {
                         // 로그인 성공
-                        const successMessage = document.getElementById('successMessage');
-                        successMessage.style.display = 'block';
-                        successMessage.querySelector('span').textContent = '로그인에 성공했습니다!';
-                        
-                        // 로그인 상태 저장
-                        localStorage.setItem('isLoggedIn', 'true');
-                        localStorage.setItem('userNickname', user.nickname || user.username);
-                        localStorage.setItem('currentUser', JSON.stringify({
-                            username: user.username,
-                            nickname: user.nickname,
-                            gender: user.gender
-                        }));
-                        
-                        // 3초 후 홈으로 이동
-                        setTimeout(() => {
-                            window.location.href = 'index.html';
-                        }, 3000);
+                        loginSuccess(user);
                     } else {
-                        // 로그인 실패
-                        const errorMessage = document.getElementById('errorMessage');
-                        errorMessage.style.display = 'block';
-                        errorMessage.querySelector('span').textContent = '아이디 또는 비밀번호가 일치하지 않습니다.';
+                        // 로컬 스토리지에 없는 경우, 서버에 로그인 요청 (실제로는 서버 API 호출)
+                        // 현재는 시뮬레이션만 함
+                        checkServerLogin(username, password);
                     }
                 });
             }
+            
+            // 사용자 로그인 성공 처리 함수
+            function loginSuccess(user) {
+                // 로그인 성공 메시지 표시
+                const successMessage = document.getElementById('successMessage');
+                successMessage.style.display = 'block';
+                successMessage.querySelector('span').textContent = '로그인에 성공했습니다!';
+                
+                // 로그인 상태 저장 (로컬 스토리지와 세션 스토리지 모두 사용)
+                localStorage.setItem('isLoggedIn', 'true');
+                localStorage.setItem('userNickname', user.nickname || user.username);
+                localStorage.setItem('currentUser', JSON.stringify({
+                    username: user.username,
+                    nickname: user.nickname,
+                    gender: user.gender
+                }));
+                
+                // 세션 스토리지에도 로그인 정보 저장
+                sessionStorage.setItem('currentUser', JSON.stringify({
+                    username: user.username,
+                    nickname: user.nickname,
+                    gender: user.gender
+                }));
+                
+                // 바로 홈으로 이동
+                window.location.href = 'index.html';
+            }
+            
+            // 서버 로그인 검증 함수 (현재는 시뮬레이션)
+            function checkServerLogin(username, password) {
+                // 실제로는 서버에 API 요청을 보내야 함
+                console.log('서버에 로그인 요청:', username);
+                
+                // 로그인 버튼 원상복구
+                const loginBtn = document.querySelector('.btn-login');
+                loginBtn.disabled = false;
+                loginBtn.textContent = '로그인';
+                
+                // 로그인 실패 메시지 표시
+                const errorMessage = document.getElementById('errorMessage');
+                errorMessage.style.display = 'block';
+                errorMessage.querySelector('span').textContent = '아이디 또는 비밀번호가 일치하지 않습니다.';
+            }
+            
         });
     </script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/js/all.min.js"></script>
