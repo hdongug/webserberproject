@@ -180,6 +180,53 @@
             border-color: var(--primary-purple);
             outline: none;
         }
+        
+        /* 랜덤 재화 박스 확률표 스타일 */
+        .random-box-info {
+            margin-top: 30px;
+            padding: 15px;
+            background-color: #f5f5f5;
+            border-radius: 8px;
+        }
+        
+        .random-box-info h3 {
+            color: var(--primary-purple);
+            margin-bottom: 15px;
+            text-align: center;
+        }
+        
+        .reward-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+        
+        .reward-table th,
+        .reward-table td {
+            padding: 8px 12px;
+            text-align: center;
+            border: 1px solid #ddd;
+        }
+        
+        .reward-table th {
+            background-color: var(--primary-purple);
+            color: white;
+            font-weight: 600;
+        }
+        
+        .reward-table tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+        
+        .reward-table tr:hover {
+            background-color: rgba(107, 70, 193, 0.1);
+        }
+        
+        /* 재화 표시 스타일 */
+        .currency-amount {
+            color: #e94560;
+            font-weight: 600;
+        }
     </style>
 </head>
 <body>
@@ -256,8 +303,31 @@
             
             <div class="attendance-reward">
                 <h3>오늘의 출석 보상</h3>
-                <p>일반 상자 1개 + 골드 500</p>
+                <p>재화 100,000원</p>
                 <button class="btn-check" id="attendanceBtn">출석체크하기</button>
+            </div>
+            
+            <div class="random-box-info">
+                <h3>랜덤 재화 박스 확률표</h3>
+                <table class="reward-table">
+                    <thead>
+                        <tr>
+                            <th>보상 금액</th>
+                            <th>확률</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr><td>100,000원</td><td>11.11%</td></tr>
+                        <tr><td>150,000원</td><td>11.11%</td></tr>
+                        <tr><td>200,000원</td><td>11.11%</td></tr>
+                        <tr><td>250,000원</td><td>11.11%</td></tr>
+                        <tr><td>300,000원</td><td>11.11%</td></tr>
+                        <tr><td>350,000원</td><td>11.11%</td></tr>
+                        <tr><td>400,000원</td><td>11.11%</td></tr>
+                        <tr><td>450,000원</td><td>11.11%</td></tr>
+                        <tr><td>500,000원</td><td>11.11%</td></tr>
+                    </tbody>
+                </table>
             </div>
         </div>
     </main>
@@ -275,10 +345,24 @@
     </footer>
 
     <!-- JavaScript -->
-    <script src="main.js"></script>
     <script src="js/common.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
+            console.log('출석체크 페이지 로드됨');
+            
+            // 로그인 상태 확인
+            const isLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
+            const currentUser = JSON.parse(localStorage.getItem('currentUser'));
+            
+            if (!isLoggedIn || !currentUser) {
+                console.log('로그인 필요');
+                alert('출석체크는 로그인 후 이용할 수 있습니다.');
+                window.location.href = 'login.html';
+                return;
+            }
+            
+            console.log('현재 사용자:', currentUser.username);
+            const userId = currentUser.id;
             // 현재 날짜 가져오기
             const today = new Date();
             const currentMonth = today.getMonth();
@@ -343,38 +427,184 @@
                 updateAttendanceStats(selectedYear, selectedMonth);
             }
             
+            // 사용자별 출석체크 기록 가져오기 함수
+            function getUserAttendance(userId) {
+                // 모든 사용자 출석데이터
+                const allAttendance = JSON.parse(localStorage.getItem('userAttendance')) || {};
+                
+                // 현재 사용자의 출석 기록
+                if (!allAttendance[userId]) {
+                    allAttendance[userId] = {
+                        history: [], // 출석일 기록
+                        streak: 0,   // 연속 출석일
+                        total: 0     // 총 출석일
+                    };
+                }
+                
+                return allAttendance[userId];
+            }
+            
+            // 연속 출석일 계산 함수
+            function calculateStreak(attendanceDates) {
+                if (!attendanceDates || attendanceDates.length === 0) {
+                    return 0;
+                }
+                
+                // 날짜를 정렬
+                const sortedDates = [...attendanceDates].sort((a, b) => new Date(b) - new Date(a));
+                
+                // 오늘 날짜
+                const today = new Date();
+                today.setHours(0, 0, 0, 0);
+                
+                // 어제 날짜
+                const yesterday = new Date(today);
+                yesterday.setDate(yesterday.getDate() - 1);
+                
+                // 가장 최근 출석일
+                const lastAttendance = new Date(sortedDates[0]);
+                lastAttendance.setHours(0, 0, 0, 0);
+                
+                // 오늘 출석했거나 어제 출석한 경우에만 연속 출석 계산
+                if (!(lastAttendance.getTime() === today.getTime() || lastAttendance.getTime() === yesterday.getTime())) {
+                    console.log('연속 출석 끊김');
+                    return 0;
+                }
+                
+                let streak = 1; // 현재 일 포함
+                let currentDate = lastAttendance;
+                
+                // 이전 출석일 확인하면서 연속성 계산
+                for (let i = 1; i < sortedDates.length; i++) {
+                    const prevDate = new Date(sortedDates[i]);
+                    prevDate.setHours(0, 0, 0, 0);
+                    
+                    // 하루 차이 확인
+                    const expectedPrevDate = new Date(currentDate);
+                    expectedPrevDate.setDate(expectedPrevDate.getDate() - 1);
+                    
+                    if (prevDate.getTime() === expectedPrevDate.getTime()) {
+                        // 연속 출석
+                        streak++;
+                        currentDate = prevDate;
+                    } else {
+                        // 연속 출석 끊김
+                        break;
+                    }
+                }
+                
+                return streak;
+            }
+            
             // 출석체크 통계 업데이트 함수
             function updateAttendanceStats(year, month) {
-                const attendanceHistory = JSON.parse(localStorage.getItem('attendanceHistory')) || [];
+                const userAttendance = getUserAttendance(userId);
                 
                 // 이번 달 출석일 계산
-                const monthlyCount = attendanceHistory.filter(dateStr => {
+                const monthlyCount = userAttendance.history.filter(dateStr => {
                     const date = new Date(dateStr);
                     return date.getFullYear() === year && date.getMonth() === month;
                 }).length;
                 
-                // 통계 업데이트
+                // 연속 출석일 계산
+                const streak = calculateStreak(userAttendance.history);
+                
+                // 통계 화면 업데이트
                 const monthlyAttendance = document.querySelectorAll('.attendance-number')[0];
+                const streakElement = document.querySelectorAll('.attendance-number')[1];
+                const totalAttendance = document.querySelectorAll('.attendance-number')[2];
+                
                 monthlyAttendance.textContent = monthlyCount;
+                streakElement.textContent = userAttendance.streak;
+                totalAttendance.textContent = userAttendance.total;
             }
             
-            // 출석체크 기록 가져오기
-            const attendanceHistory = JSON.parse(localStorage.getItem('attendanceHistory')) || [];
+            // 현재 사용자의 출석체크 기록 가져오기
+            const userAttendance = getUserAttendance(userId);
             
             // 오늘 출석 체크 여부 확인
             const todayString = new Date().toDateString();
-            const attendedToday = attendanceHistory.includes(todayString);
+            const attendedToday = userAttendance.history.includes(todayString);
+            
+            // 랜덤 재화 박스 가째오기 함수
+            function getRandomRewardBox() {
+                // 가능한 재화 금액 배열 (100,000원 ~ 500,000원)
+                const possibleRewards = [
+                    100000, 150000, 200000, 250000, 300000, 350000, 400000, 450000, 500000
+                ];
+                
+                // 랜덤 인덱스 선택 (0~8)
+                const randomIndex = Math.floor(Math.random() * possibleRewards.length);
+                
+                // 선택된 랜덤 재화 반환
+                return possibleRewards[randomIndex];
+            }
+            
+            // 보상 계산 함수
+            function calculateReward(streak) {
+                // 기본 보상
+                let reward = {
+                    currency: 100000, // 기본 출석 보상 100,000원
+                    items: [],
+                    randomBoxReward: 0 // 랜덤 박스에서 나온 재화
+                };
+                
+                // 연속 출석 보상 계산
+                if (streak >= 28) {
+                    reward.currency = 350000;
+                    reward.items.push('랜덤 재화 박스 1개');
+                    reward.randomBoxReward = getRandomRewardBox();
+                } else if (streak >= 21) {
+                    reward.currency = 150000;
+                    reward.items.push('랜덤 재화 박스 1개');
+                    reward.randomBoxReward = getRandomRewardBox();
+                } else if (streak >= 14) {
+                    reward.currency = 250000;
+                    reward.items.push('랜덤 재화 박스 1개');
+                    reward.randomBoxReward = getRandomRewardBox();
+                } else if (streak >= 7) {
+                    reward.currency = 150000;
+                    reward.items.push('랜덤 재화 박스 1개');
+                    reward.randomBoxReward = getRandomRewardBox();
+                }
+                
+                // 특별 출석일 추가 보상 (총 출석일 기준)
+                const total = userAttendance.total + 1; // 출석 후 총 출석일
+                if (total % 30 === 0) {
+                    reward.items.push('프리미엄 랜덤 재화 박스 1개');
+                    reward.currency += 100000;
+                    // 프리미엄 박스는 최소 200,000원 보장
+                    reward.randomBoxReward += Math.max(200000, getRandomRewardBox());
+                }
+                
+                return reward;
+            }
+            
+            // 사용자 출석 정보 저장 함수
+            function saveUserAttendance(userId, attendance) {
+                const allAttendance = JSON.parse(localStorage.getItem('userAttendance')) || {};
+                allAttendance[userId] = attendance;
+                localStorage.setItem('userAttendance', JSON.stringify(allAttendance));
+            }
             
             // 출석체크 버튼 이벤트 및 상태 업데이트
             const attendanceBtn = document.getElementById('attendanceBtn');
             if (attendanceBtn) {
                 // 이미 오늘 출석했다면 버튼 비활성화
                 if (attendedToday) {
+                    console.log('이미 오늘 출석했음');
                     attendanceBtn.disabled = true;
                     attendanceBtn.textContent = '오늘 출석완료!';
                 }
                 
                 attendanceBtn.addEventListener('click', function() {
+                    console.log('출석체크 버튼 클릭됨');
+                    
+                    if (attendedToday) {
+                        alert('오늘은 이미 출석체크를 완료했습니다.');
+                        return;
+                    }
+                    
                     // 오늘 날짜에 해당하는 요소 찾기
                     const todayElement = document.querySelector('.calendar-day.today');
                     if (todayElement) {
@@ -385,32 +615,58 @@
                         todayElement.appendChild(checkIcon);
                         
                         // 오늘 날짜를 기록에 추가
-                        if (!attendanceHistory.includes(todayString)) {
-                            attendanceHistory.push(todayString);
-                            localStorage.setItem('attendanceHistory', JSON.stringify(attendanceHistory));
+                        if (!userAttendance.history.includes(todayString)) {
+                            // 출석 기록 업데이트
+                            userAttendance.history.push(todayString);
+                            userAttendance.total += 1;
+                            
+                            // 연속 출석일 계산
+                            userAttendance.streak = calculateStreak(userAttendance.history);
+                            
+                            // 보상 계산
+                            const reward = calculateReward(userAttendance.streak);
+                            
+                            // 보상 화면 표시
+                            let rewardText = `재화 <span class="currency-amount">${reward.currency.toLocaleString()}원</span>`;
+                            
+                            // 랜덤 박스 보상이 있으면 추가
+                            if (reward.randomBoxReward > 0) {
+                                rewardText += ` + 랜덤 재화 <span class="currency-amount">${reward.randomBoxReward.toLocaleString()}원</span>`;
+                            }
+                            
+                            // 아이템 있으면 추가
+                            if (reward.items.length > 0) {
+                                rewardText += ' + ' + reward.items.join(', ');
+                            }
+                            
+                            // 리워드 텍스트에 HTML 태그가 포함되어 있으므로 innerHTML로 설정
+                            document.querySelector('.attendance-reward p').innerHTML = rewardText;
+                            
+                            // 저장
+                            saveUserAttendance(userId, userAttendance);
                             
                             // 통계 업데이트
-                            const monthlyAttendance = document.querySelectorAll('.attendance-number')[0];
-                            const streak = document.querySelectorAll('.attendance-number')[1];
-                            const totalAttendance = document.querySelectorAll('.attendance-number')[2];
+                            updateAttendanceStats(today.getFullYear(), today.getMonth());
                             
-                            monthlyAttendance.textContent = parseInt(monthlyAttendance.textContent) + 1;
-                            streak.textContent = parseInt(streak.textContent) + 1;
-                            totalAttendance.textContent = parseInt(totalAttendance.textContent) + 1;
+                            // 버튼 비활성화
+                            attendanceBtn.disabled = true;
+                            attendanceBtn.textContent = '오늘 출석완료!';
                             
-                            // 가상 재화 지급 (실제 구현은 데이터베이스에 저장해야 함)
-                            alert('출석체크 보상을 지급했습니다! (일반 상자 1개 + 골드 500)');
+                            // 완료 메시지용 텍스트 (알림용은 HTML 태그 제거)
+                            const alertText = `출석체크 완료!\n보상: 재화 ${reward.currency.toLocaleString()}원`;
+                            
+                            // 랜덤 박스 보상 추가
+                            if (reward.randomBoxReward > 0) {
+                                const boxText = `\n+ 랜덤 박스에서 재화 ${reward.randomBoxReward.toLocaleString()}원이 나왔습니다!`;
+                                alert(alertText + boxText);
+                            } else {
+                                alert(alertText);
+                            }
                         }
-                        
-                        // 버튼 비활성화
-                        attendanceBtn.disabled = true;
-                        attendanceBtn.textContent = '오늘 출석완료!';
                     }
                 });
             }
-        });
-        
-        // 달력 생성 함수
+            
         function createCalendar(year, month, container) {
             // 날짜를 넣을 컨테이너 가져오기
             const daysContainer = document.getElementById('calendar-days-container');
@@ -449,12 +705,11 @@
                     dayElement.classList.add('today');
                 }
                 
-                // 실제 출석체크 데이터 기반으로 표시
-                // localStorage에서 출석체크 기록 확인
-                const attendanceHistory = JSON.parse(localStorage.getItem('attendanceHistory')) || [];
+                // 현재 사용자의 출석체크 데이터 기반으로 표시
                 const checkDate = new Date(year, month, i).toDateString();
                 
-                if (attendanceHistory.includes(checkDate)) {
+                // 사용자별 출석 기록에서 확인
+                if (userAttendance.history.includes(checkDate)) {
                     dayElement.classList.add('checked');
                     const checkIcon = document.createElement('i');
                     checkIcon.className = 'fas fa-check calendar-check';
@@ -468,6 +723,10 @@
             document.querySelector('.attendance-header h1').innerHTML = 
                 '일일 출석체크 <span style="color: var(--primary-purple);">(' + (month + 1) + '월)</span>';
         }
+        
+        // 초기화 시 출석 통계 업데이트
+        updateAttendanceStats(currentYear, currentMonth);
+        });
     </script>
 </body>
 </html>
