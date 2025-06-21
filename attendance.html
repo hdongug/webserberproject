@@ -129,7 +129,7 @@
             margin: 20px auto 0;
             padding: 10px;
             background-color: var(--primary-purple);
-            color: white;
+            color: black;
             border: none;
             border-radius: 4px;
             font-weight: 500;
@@ -362,17 +362,26 @@
             }
             
             console.log('현재 사용자:', currentUser.username);
-            const userId = currentUser.id;
+            const userId = currentUser.id || currentUser.username; // ID가 없으면 사용자명 사용
             
-            // 현재 날짜 가져오기
+            // 현재 날짜 가져오기 (한국 서울 시간 기준)
             const today = new Date();
-            const currentMonth = today.getMonth();
-            const currentYear = today.getFullYear();
+            const koreaOptions = { timeZone: 'Asia/Seoul' };
+            const koreaDate = new Date(new Date().toLocaleString('en-US', koreaOptions));
+            const currentMonth = koreaDate.getMonth();
+            const currentYear = koreaDate.getFullYear();
+            const currentDate = koreaDate.getDate();
+            
+            console.log('한국 시간: ' + koreaDate.toLocaleString('ko-KR', koreaOptions));
+            console.log('현재 날짜: ' + currentYear + '년 ' + (currentMonth+1) + '월 ' + currentDate + '일');
+            
+            // 캘린더 컨테이너 참조 추가
+            const calendarContainer = document.getElementById('calendar-days-container');
             
             // 년도 선택 드롭다운 초기화
             const yearSelect = document.getElementById('yearSelect');
-            const startYear = currentYear - 5;
-            const endYear = currentYear + 5;
+            const startYear = currentYear - 2;
+            const endYear = currentYear + 2;
             
             for (let year = startYear; year <= endYear; year++) {
                 const option = document.createElement('option');
@@ -401,86 +410,102 @@
                 monthSelect.appendChild(option);
             }
             
-            // 달력 생성
-            const calendarContainer = document.getElementById('calendar-days-container');
+            // 년월 선택 변경 시 달력 업데이트
+            yearSelect.addEventListener('change', updateCalendar);
+            monthSelect.addEventListener('change', updateCalendar);
             
-            // 연도와 월 선택 이벤트 설정
+            // 달력 초기 생성
+            createCalendar(currentYear, currentMonth, calendarContainer);
+            
+            // 출석체크 버튼 이벤트 리스너 설정
             yearSelect.addEventListener('change', updateCalendar);
             monthSelect.addEventListener('change', updateCalendar);
             
             // 달력 업데이트 함수
             function updateCalendar() {
-                // 선택한 연도와 월 가져오기
-                const selectedYear = parseInt(yearSelect.value);
-                const selectedMonth = parseInt(monthSelect.value);
+                const yearValue = parseInt(yearSelect.value);
+                const monthValue = parseInt(monthSelect.value);
                 
-                // 달력 생성
-                createCalendar(selectedYear, selectedMonth, calendarContainer);
+                // 달력 다시 그리기 (HTML 요일 헤더는 유지)
+                createCalendar(yearValue, monthValue, calendarContainer);
                 
-                // 통계 업데이트
-                updateAttendanceStats(selectedYear, selectedMonth);
+                // 출석 통계 업데이트
+                updateAttendanceStats(yearValue, monthValue);
+                
+                // 버튼 상태 업데이트
+                checkTodayAttendance();
+                
+                console.log('달력 업데이트 완료: ' + yearValue + '년 ' + (monthValue+1) + '월');
             }
             
             // 사용자별 출석 기록 가져오기
             function getUserAttendance(userId) {
-                const allAttendance = JSON.parse(localStorage.getItem('userAttendance')) || {};
-                if (!allAttendance[userId]) {
-                    allAttendance[userId] = { history: [], streak: 0, total: 0 };
-                    localStorage.setItem('userAttendance', JSON.stringify(allAttendance));
+                // 로컬 스토리지에서 사용자의 출석 데이터 조회
+                const attendanceKey = 'attendance_' + userId;
+                const attendanceData = localStorage.getItem(attendanceKey);
+                
+                // 데이터가 없으면 새로 생성하여 반환
+                if (!attendanceData) {
+                    return { history: [], streak: 0, total: 0 };
                 }
-                return allAttendance[userId];
+                
+                const parsedData = JSON.parse(attendanceData);
+                // 기본 필드 확인 및 생성
+                if (!parsedData.history) parsedData.history = [];
+                if (!parsedData.streak) parsedData.streak = 0;
+                if (!parsedData.total) parsedData.total = 0;
+                
+                return parsedData;
             }
             
-            // 연속 출석일 계산 함수
+            // 연속 출석일 계산 함수 (개선된 버전)
             function calculateStreak(attendanceDates) {
                 if (!attendanceDates || attendanceDates.length === 0) {
                     return 0;
                 }
                 
-                // 날짜를 정렬
-                const sortedDates = [...attendanceDates].sort((a, b) => new Date(b) - new Date(a));
+                // 날짜별 출석 여부를 기록할 객체
+                const dateCheckins = {};
                 
-                // 오늘 날짜
+                // 모든 출석일을 객체에 기록
+                attendanceDates.forEach(dateStr => {
+                    const date = new Date(dateStr);
+                    // 날짜를 'YYYY-MM-DD' 형식으로 정규화
+                    const normalizedDate = date.toISOString().split('T')[0];
+                    dateCheckins[normalizedDate] = true;
+                });
+                
+                // 오늘 날짜 구하기 (현지 시간 기준으로 정규화)
                 const today = new Date();
-                today.setHours(0, 0, 0, 0);
+                const todayStr = today.toISOString().split('T')[0];
                 
-                // 어제 날짜
-                const yesterday = new Date(today);
-                yesterday.setDate(yesterday.getDate() - 1);
+                // 현재 연속 일수 계산
+                let currentStreak = 0;
+                let checkDate = new Date(today);
                 
-                // 가장 최근 출석일
-                const lastAttendance = new Date(sortedDates[0]);
-                lastAttendance.setHours(0, 0, 0, 0);
-                
-                // 오늘 출석했거나 어제 출석한 경우에만 연속 출석 계산
-                if (!(lastAttendance.getTime() === today.getTime() || lastAttendance.getTime() === yesterday.getTime())) {
-                    console.log('연속 출석 끊김');
-                    return 0;
-                }
-                
-                let streak = 1; // 현재 일 포함
-                let currentDate = lastAttendance;
-                
-                // 이전 출석일 확인하면서 연속성 계산
-                for (let i = 1; i < sortedDates.length; i++) {
-                    const prevDate = new Date(sortedDates[i]);
-                    prevDate.setHours(0, 0, 0, 0);
+                // 오늘부터 역순으로 연속된 출석일 확인
+                while (true) {
+                    // 날짜를 'YYYY-MM-DD' 형식으로 변환
+                    const checkDateStr = checkDate.toISOString().split('T')[0];
                     
-                    // 하루 차이 확인
-                    const expectedPrevDate = new Date(currentDate);
-                    expectedPrevDate.setDate(expectedPrevDate.getDate() - 1);
-                    
-                    if (prevDate.getTime() === expectedPrevDate.getTime()) {
-                        // 연속 출석
-                        streak++;
-                        currentDate = prevDate;
+                    // 해당 날짜에 출석했는지 확인
+                    if (dateCheckins[checkDateStr]) {
+                        currentStreak++;
+                        // 하루 전으로 이동
+                        checkDate.setDate(checkDate.getDate() - 1);
                     } else {
+                        // 오늘 출석하지 않았지만, 어제 출석했다면 어제까지의 연속 출석일 유지
+                        if (checkDateStr === todayStr && currentStreak === 0) {
+                            // 오늘 아직 출석하지 않은 경우, 어제부터 확인
+                            checkDate.setDate(checkDate.getDate() - 1);
+                            continue;
+                        }
                         // 연속 출석 끊김
                         break;
                     }
                 }
                 
-                return streak;
+                return currentStreak;
             }
             
             // 출석체크 통계 업데이트 함수
@@ -514,9 +539,17 @@
             // 현재 사용자의 출석체크 기록 가져오기
             const userAttendance = getUserAttendance(userId);
             
-            // 오늘 출석 체크 여부 확인
-            const todayString = new Date().toDateString();
-            const attendedToday = userAttendance.history.includes(todayString);
+            // 오늘 출석 체크 여부 확인 - 한국 시간 기준 (ISO 문자열 형식으로 표준화)
+            const koreaDateForCheck = new Date(new Date().toLocaleString('en-US', koreaOptions));
+            const todayString = koreaDateForCheck.toISOString().split('T')[0]; // YYYY-MM-DD 형식으로 표준화
+            console.log('한국 기준 출석체크 날짜: ' + todayString);
+            
+            // 출석 기록 정규화
+            const normalizedHistory = userAttendance.history.map(dateStr => {
+                return new Date(dateStr).toISOString().split('T')[0];
+            });
+            
+            const attendedToday = normalizedHistory.includes(todayString);
             
             // 랜덤 재화 박스 가째오기 함수
             function getRandomRewardBox() {
@@ -574,9 +607,9 @@
             
             // 사용자 출석 정보 저장 함수
             function saveUserAttendance(userId, attendance) {
-                const allAttendance = JSON.parse(localStorage.getItem('userAttendance')) || {};
-                allAttendance[userId] = attendance;
-                localStorage.setItem('userAttendance', JSON.stringify(allAttendance));
+                // 특정 사용자의 출석 데이터를 직접 저장
+                const attendanceKey = 'attendance_' + userId;
+                localStorage.setItem(attendanceKey, JSON.stringify(attendance));
             }
             
             // 출석체크 버튼 이벤트 및 상태 업데이트
@@ -597,19 +630,38 @@
                         return;
                     }
                     
+                    // 한국 시간 기준으로 오늘 날짜 다시 확인
+                    const currentKoreaDate = new Date(new Date().toLocaleString('en-US', koreaOptions));
+                    const currentKoreaYear = currentKoreaDate.getFullYear();
+                    const currentKoreaMonth = currentKoreaDate.getMonth();
+                    const currentKoreaDay = currentKoreaDate.getDate();
+                    
+                    console.log('출석체크 클릭 - 현재 한국 날짜:', currentKoreaYear + '-' + 
+                      (currentKoreaMonth + 1).toString().padStart(2, '0') + '-' + 
+                      currentKoreaDay.toString().padStart(2, '0'));
+                    
                     // 오늘 날짜에 해당하는 요소 찾기
                     const todayElement = document.querySelector('.calendar-day.today');
                     if (todayElement) {
                         // 달력에 출석 표시 추가
                         todayElement.classList.add('checked');
-                        const checkIcon = document.createElement('i');
-                        checkIcon.className = 'fas fa-check calendar-check';
-                        todayElement.appendChild(checkIcon);
                         
-                        // 오늘 날짜를 기록에 추가
-                        if (!userAttendance.history.includes(todayString)) {
-                            // 출석 기록 업데이트
-                            userAttendance.history.push(todayString);
+                        // 기존 체크 아이콘이 있는지 확인
+                        const existingIcon = todayElement.querySelector('.calendar-check');
+                        if (existingIcon) {
+                            existingIcon.style.display = 'block'; // 기존 아이콘을 보이는 상태로 변경
+                        } else {
+                            // 새 체크 아이콘 추가
+                            const checkIcon = document.createElement('i');
+                            checkIcon.className = 'fas fa-check calendar-check';
+                            checkIcon.style.display = 'block'; // 확실하게 보이게 설정
+                            todayElement.appendChild(checkIcon);
+                        }
+                        
+                        // 오늘 날짜를 기록에 추가 (한국 시간 기준)
+                        if (!normalizedHistory.includes(todayString)) {
+                            // 출석 기록 업데이트 (한국 시간으로 저장)
+                            userAttendance.history.push(koreaDateForCheck.toISOString()); // 전체 ISO 문자열 저장
                             userAttendance.total += 1;
                             
                             // 연속 출석일 계산
@@ -637,8 +689,8 @@
                             // 저장
                             saveUserAttendance(userId, userAttendance);
                             
-                            // 통계 업데이트
-                            updateAttendanceStats(today.getFullYear(), today.getMonth());
+                            // 통계 업데이트 (한국 시간 기준)
+                            updateAttendanceStats(currentKoreaYear, currentKoreaMonth);
                             
                             // 버튼 비활성화
                             attendanceBtn.disabled = true;
@@ -659,14 +711,12 @@
                 });
             }
             
+        // 달력 생성 함수
         function createCalendar(year, month, container) {
             // 요일 헤더를 제외한 모든 날짜 셀 제거
-            const dayElements = container.querySelectorAll('.calendar-day:not(.calendar-day-name)');
-            dayElements.forEach(day => {
-                if (day.parentNode === container) {
-                    container.removeChild(day);
-                }
-            });
+            while (container.children.length > 7) { // 요일 헤더 7개는 남김
+                container.removeChild(container.lastChild);
+            }
             
             // 월의 첫 날
             const firstDay = new Date(year, month, 1);
@@ -697,19 +747,25 @@
                 dayNumber.textContent = i;
                 dayElement.appendChild(dayNumber);
                 
-                // 오늘 날짜 표시
-                if (year === today.getFullYear() && month === today.getMonth() && i === today.getDate()) {
+                // 오늘 날짜 표시 (한국 시간 기준)
+                if (year === koreaDate.getFullYear() && month === koreaDate.getMonth() && i === koreaDate.getDate()) {
                     dayElement.classList.add('today');
                 }
                 
                 // 현재 사용자의 출석체크 데이터 기반으로 표시
-                const checkDate = new Date(year, month, i).toDateString();
+                const checkDate = new Date(year, month, i);
+                const checkDateISO = checkDate.toISOString().split('T')[0]; // YYYY-MM-DD 형식
                 
-                // 사용자별 출석 기록에서 확인
-                if (userAttendance.history.includes(checkDate)) {
+                // 사용자별 출석 기록에서 확인 (정규화된 날짜로 비교)
+                const normalizedDates = userAttendance.history.map(dateStr => 
+                    new Date(dateStr).toISOString().split('T')[0]
+                );
+                
+                if (normalizedDates.includes(checkDateISO)) {
                     dayElement.classList.add('checked');
                     const checkIcon = document.createElement('i');
                     checkIcon.className = 'fas fa-check calendar-check';
+                    checkIcon.style.display = 'block'; // 반드시 보이게 함
                     dayElement.appendChild(checkIcon);
                 }
                 

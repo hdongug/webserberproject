@@ -690,4 +690,3 @@ function logout() {
     window.location.href = 'login.html';
 }
 
-// 30분마다 추천 아이템 표시 (인덱스 페이지에서 구현될 예정)
